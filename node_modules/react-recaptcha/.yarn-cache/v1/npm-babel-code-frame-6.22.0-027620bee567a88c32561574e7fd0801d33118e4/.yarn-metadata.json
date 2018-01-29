@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/babel-code-frame/-/babel-code-frame-6.22.0.tgz#027620bee567a88c32561574e7fd0801d33118e4",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/babel-code-frame/-/babel-code-frame-6.22.0.tgz",
+    "hash": "027620bee567a88c32561574e7fd0801d33118e4",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "027620bee567a88c32561574e7fd0801d33118e4"
+}

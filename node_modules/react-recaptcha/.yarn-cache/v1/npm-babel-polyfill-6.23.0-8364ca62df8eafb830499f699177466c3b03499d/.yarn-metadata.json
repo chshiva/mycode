@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.23.0.tgz#8364ca62df8eafb830499f699177466c3b03499d",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.23.0.tgz",
+    "hash": "8364ca62df8eafb830499f699177466c3b03499d",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "8364ca62df8eafb830499f699177466c3b03499d"
+}

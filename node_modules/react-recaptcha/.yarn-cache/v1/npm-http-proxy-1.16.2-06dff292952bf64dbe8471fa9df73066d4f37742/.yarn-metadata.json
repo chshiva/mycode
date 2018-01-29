@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.16.2.tgz#06dff292952bf64dbe8471fa9df73066d4f37742",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.16.2.tgz",
+    "hash": "06dff292952bf64dbe8471fa9df73066d4f37742",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "06dff292952bf64dbe8471fa9df73066d4f37742"
+}

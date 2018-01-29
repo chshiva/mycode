@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.1.tgz#be8b36aefccde8b3ca7aa2d6afc07a37242c0d2d",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.1.tgz",
+    "hash": "be8b36aefccde8b3ca7aa2d6afc07a37242c0d2d",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "be8b36aefccde8b3ca7aa2d6afc07a37242c0d2d"
+}

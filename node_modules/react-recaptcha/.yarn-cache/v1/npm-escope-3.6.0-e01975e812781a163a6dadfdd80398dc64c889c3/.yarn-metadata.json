@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/escope/-/escope-3.6.0.tgz#e01975e812781a163a6dadfdd80398dc64c889c3",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/escope/-/escope-3.6.0.tgz",
+    "hash": "e01975e812781a163a6dadfdd80398dc64c889c3",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "e01975e812781a163a6dadfdd80398dc64c889c3"
+}

@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/es6-iterator/-/es6-iterator-2.0.1.tgz#8e319c9f0453bf575d374940a655920e59ca5512",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/es6-iterator/-/es6-iterator-2.0.1.tgz",
+    "hash": "8e319c9f0453bf575d374940a655920e59ca5512",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "8e319c9f0453bf575d374940a655920e59ca5512"
+}

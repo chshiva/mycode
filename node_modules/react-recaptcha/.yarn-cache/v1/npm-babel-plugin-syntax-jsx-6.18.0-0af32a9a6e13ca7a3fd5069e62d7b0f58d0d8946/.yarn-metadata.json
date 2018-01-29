@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/babel-plugin-syntax-jsx/-/babel-plugin-syntax-jsx-6.18.0.tgz#0af32a9a6e13ca7a3fd5069e62d7b0f58d0d8946",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/babel-plugin-syntax-jsx/-/babel-plugin-syntax-jsx-6.18.0.tgz",
+    "hash": "0af32a9a6e13ca7a3fd5069e62d7b0f58d0d8946",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "0af32a9a6e13ca7a3fd5069e62d7b0f58d0d8946"
+}

@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/babel-plugin-syntax-object-rest-spread/-/babel-plugin-syntax-object-rest-spread-6.13.0.tgz#fd6536f2bce13836ffa3a5458c4903a597bb3bf5",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/babel-plugin-syntax-object-rest-spread/-/babel-plugin-syntax-object-rest-spread-6.13.0.tgz",
+    "hash": "fd6536f2bce13836ffa3a5458c4903a597bb3bf5",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "fd6536f2bce13836ffa3a5458c4903a597bb3bf5"
+}

@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/babel-plugin-syntax-class-properties/-/babel-plugin-syntax-class-properties-6.13.0.tgz#d7eb23b79a317f8543962c505b827c7d6cac27de",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/babel-plugin-syntax-class-properties/-/babel-plugin-syntax-class-properties-6.13.0.tgz",
+    "hash": "d7eb23b79a317f8543962c505b827c7d6cac27de",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "d7eb23b79a317f8543962c505b827c7d6cac27de"
+}

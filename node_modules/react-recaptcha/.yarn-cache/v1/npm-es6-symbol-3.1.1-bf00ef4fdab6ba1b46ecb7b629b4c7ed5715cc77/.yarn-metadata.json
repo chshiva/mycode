@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/es6-symbol/-/es6-symbol-3.1.1.tgz#bf00ef4fdab6ba1b46ecb7b629b4c7ed5715cc77",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/es6-symbol/-/es6-symbol-3.1.1.tgz",
+    "hash": "bf00ef4fdab6ba1b46ecb7b629b4c7ed5715cc77",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "bf00ef4fdab6ba1b46ecb7b629b4c7ed5715cc77"
+}

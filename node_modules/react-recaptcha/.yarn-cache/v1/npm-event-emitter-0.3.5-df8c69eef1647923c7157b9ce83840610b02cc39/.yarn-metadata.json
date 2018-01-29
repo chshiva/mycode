@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/event-emitter/-/event-emitter-0.3.5.tgz#df8c69eef1647923c7157b9ce83840610b02cc39",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/event-emitter/-/event-emitter-0.3.5.tgz",
+    "hash": "df8c69eef1647923c7157b9ce83840610b02cc39",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "df8c69eef1647923c7157b9ce83840610b02cc39"
+}

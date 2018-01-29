@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/babel-plugin-syntax-decorators/-/babel-plugin-syntax-decorators-6.13.0.tgz#312563b4dbde3cc806cee3e416cceeaddd11ac0b",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/babel-plugin-syntax-decorators/-/babel-plugin-syntax-decorators-6.13.0.tgz",
+    "hash": "312563b4dbde3cc806cee3e416cceeaddd11ac0b",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "312563b4dbde3cc806cee3e416cceeaddd11ac0b"
+}

@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/uuid/-/uuid-2.0.3.tgz#67e2e863797215530dff318e5bf9dcebfd47b21a",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/uuid/-/uuid-2.0.3.tgz",
+    "hash": "67e2e863797215530dff318e5bf9dcebfd47b21a",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "67e2e863797215530dff318e5bf9dcebfd47b21a"
+}

@@ -1,0 +1,12 @@
+{
+  "artifacts": [],
+  "remote": {
+    "resolved": "https://registry.yarnpkg.com/is-my-json-valid/-/is-my-json-valid-2.16.0.tgz#f079dd9bfdae65ee2038aae8acbc86ab109e3693",
+    "type": "tarball",
+    "reference": "https://registry.yarnpkg.com/is-my-json-valid/-/is-my-json-valid-2.16.0.tgz",
+    "hash": "f079dd9bfdae65ee2038aae8acbc86ab109e3693",
+    "registry": "npm"
+  },
+  "registry": "npm",
+  "hash": "f079dd9bfdae65ee2038aae8acbc86ab109e3693"
+}
