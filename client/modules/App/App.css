@@ -1,0 +1,70 @@
+.container {
+  /*max-width: 980px;
+  width: 100%;
+  padding: 15px;
+  margin: 0 auto;*/
+}
+.goBackDash {
+	margin-bottom: 16px;
+}
+.goTextDash {
+	margin-top: 25%;
+}
+.goBackDash button {
+	padding: 8px 12px;
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	border-radius: 2px;
+	border: none;
+	background-color: #008abc;
+	color: #ffffff;
+	font-family: "Helvetica Neue",
+	Helvetica,
+	Arial,
+	sans-serif;
+
+}
+
+
+
+.sectionMain{padding: 0; margin:0; position: relative; top:56px; height: calc(100vh - 56px);}
+
+/*Loading CSS*/
+
+/*.sectionLoading p{
+	padding: 0;
+	margin-top: 16px;
+	color: rgba(0,0,0,0.87);
+}*/
+
+.aligner{display: flex; z-index : 50; align-items: center; justify-content: center; height: calc(100vh - 64px); }
+.centerAligner {min-width: 256px; background-color: #fff; padding: 16px; box-shadow: 1px 2px 3px rgba(0,0,0,0.12); border-radius: 2px; color: rgba(0,0,0,0.87);}
+.errorIcon {position: relative; display: block; height: 100%;}
+.errorIcon > img {width: 100%; height: auto; display: block;}
+.paraVal {padding: 0; margin-top: 32px; color: rgba(0,0,0,0.87);}
+
+/*Mobile*/
+
+@media(max-width: 767px) {
+	/* .aligner{ height: calc(100vh - 105px); } */
+	.centerAligner { width: 100%; height: calc(100% - 36px);}
+	.errorIcon>img {
+	  width: 72%;
+	  height: auto;
+	  margin: 0 auto;
+	  display: block;
+	}
+	.goBackDash {
+	}
+	.goTextDash {
+	margin-top: 0;
+}
+	.aligner {
+	  height: calc(100vh - 106px);
+	}
+	.errorIcon { position: absolute; top: 168px;}
+
+
+
+}

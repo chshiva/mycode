@@ -1,0 +1,367 @@
+import React, { PropTypes, Component } from 'react';
+import callApi from '../../../../util/apiCaller';
+import { Link } from 'react-router';
+import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
+import FontAwesome from 'react-fontawesome';
+import {Col, Row, Grid, Carousel} from 'react-bootstrap';
+import { connect } from 'react-redux';
+
+import styles from '../../Dashboard.css';
+
+import WoogeenManager from '../../../Communication/WoogeenManager';
+import ControlVideo from './ControlVideo';
+import HostControl from './HostControl';
+
+export class PresenterConf extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      speakerVideo: false,
+      showControl: false,
+      showHost: false,
+      selfVideo: false,
+    }
+    this.selfVideo = null;
+
+    this.SyncSpeaker = this.SyncSpeaker.bind(this);
+    this.setSelfVideo    = this.setSelfVideo.bind(this);
+    this.selfSpeaker  = this.selfSpeaker.bind(this);
+    this.amEarly = false;
+
+    this.props.confObject.selfSpeaker(this.selfSpeaker);
+
+    if(this.props.noScrollConf){
+        this.props.confObject.SetSpeakerListener(this.SyncSpeaker);
+        this.props.confObject.setSelfVideo(this.setSelfVideo);
+    }
+  }
+
+  setSelfVideo (stream){
+    console.log('hello', stream);
+    this.selfVideo = stream;
+    // this.displayStream(this.selfVideo, 'dvSmallScreen');
+  }
+
+  componentDidMount() {
+    if(this.props.token != '' && this.props.token != undefined){
+        var that = this;
+        this.props.confObject.getConference(this.props.iceServers, this.props.transport, function(res){
+          that.joinConference();
+        });
+    }
+    console.log(this.props.confObject.WhatIsMyBrowser());
+  }
+
+  componentWillUnmount() {
+    this.props.confObject.hideLocalStream(); 
+  }
+
+  getSubscribers(streams){
+
+  }
+
+  joinConference(){
+    var that = this;
+    var settings = {video: this.props.selfVideo, publish: this.props.publishVideo,
+                    audio: this.props.selfAudio, codec: this.props.codec,
+                    uid: this.props.myid, videoResolution: this.props.videoResolution
+                  };
+    this.props.confObject.joinConference(this.props.token, settings, function(status, streams, selfVideo){
+        console.log("Self Video", selfVideo);
+        that.selfVideo = selfVideo;
+
+        that.props.sendStreams(streams);
+
+    });
+  }
+
+  showHost(){
+    this.setState({showHost: true});
+  }
+
+  closeHost(){
+     this.setState({showHost: false}); 
+  }
+
+  showControl(){
+     this.setState({showControl: true});
+  }
+ 
+  closeControl(){
+     this.setState({showControl: false}); 
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log("Received Props", this.selfVideo);
+    /*Length should be greater than 1, then there is lot to deal with speakers, 
+    if else, its just you*/
+    if(nextProps.streams.length > 1){
+      if(this.selfVideo){
+
+        if(this.selfVideo.showing){
+          let elementId = document.getElementById(this.selfVideo.elementId).parentElement.id;
+          //If Yes where?
+          if(elementId != 'dvSmallScreen'){
+            //Its time to move him to small video
+            this.selfVideo.hide();
+            document.getElementById(this.selfVideo.elementId).remove();
+            this.setState({selfVideo: true});
+            this.displayStream(this.selfVideo, 'dvSmallScreen');
+          }
+        }else{
+          this.setState({selfVideo: true});
+          this.displayStream(this.selfVideo, 'dvSmallScreen');
+        }
+      }else{
+        this.setState({selfVideo: false});
+      }
+        //Subscribe the next video to big screen. Second index of stream is always speaker.
+        let sp_stream = nextProps.streams[1];
+
+        if(sp_stream.showing){
+
+          //Showing where?
+          let elementId = document.getElementById(sp_stream.elementId).parentElement.id;
+          if(elementId != 'dvPresenterScreen'){
+            sp_stream.hide();
+            document.getElementById(elementId).remove();
+
+            this.displayStream(sp_stream, 'dvPresenterScreen');
+          }
+        }else{
+          this.subscribeVideo(sp_stream);
+        }
+      //}
+    }else{
+      if(this.selfVideo){
+        if(this.selfVideo.showing){
+          let elementId = document.getElementById(this.selfVideo.elementId).parentElement.id;
+
+          if(elementId == 'dvSmallScreen'){
+                //Its time to move him to big screen
+              this.selfVideo.hide();
+              document.getElementById(this.selfVideo.elementId).remove();
+
+              this.setState({selfVideo: true});
+              this.displayStream(this.selfVideo, 'dvPresenterScreen');
+          }
+        }else{
+          this.setState({selfVideo: true});
+          this.displayStream(this.selfVideo, 'dvPresenterScreen');
+        }
+      }
+    }
+  }
+
+  subscribeVideo(stream){
+    var that = this;
+    if(!stream.showing && stream.mediaStream == undefined && stream.from != ""){
+        this.props.confObject.trySubscribeStream(stream, function(stream){
+          that.displayStream(stream, 'dvPresenterScreen');
+        });
+    }else{
+      if(!stream.showing && stream.from != "" && stream.mediaStream){
+        this.displayStream(stream, 'dvPresenterScreen');
+      }
+    }
+  }
+
+  displayStream(stream, element){
+    console.log("Disp Stream", stream, element);
+    
+      var div = document.createElement('div');
+      div.setAttribute('id', 'prvid' + stream.id());
+      div.setAttribute('style', 'width: 100%; height: 100%;');
+
+      document.getElementById(element).appendChild(div);
+      stream.show('prvid' + stream.id());
+  }
+
+  selfSpeaker(){
+    // console.log("Called ")
+
+    if(!this.props.onlyPresenter){
+        if(this.props.attendees){
+          var attIndex = _.findIndex(this.props.attendees, ['name', this.props.myid]);
+          console.log(attIndex);
+          if(attIndex >= 0){
+            let objSpeaker = {
+                        command: 'SPEAKER-REQ',
+                        content: {stream_from: this.props.attendees[attIndex].id},
+                        type: 'STRING'
+                      };
+            this.props.confObject.sendMessage(objSpeaker, 0);
+          }
+        }
+    }else{
+        if(this.props.streams.length > 1){
+          var spStream = this.props.streams[1];
+          if(spStream){
+            if(spStream.showing){
+              
+              let objSpeaker = {
+                        command: 'SPEAKER-REQ',
+                        content: {stream_from: spStream.from},
+                        type: 'STRING'
+                      };
+
+              this.props.confObject.sendMessage(objSpeaker, 0);   
+            }
+          }
+        }      
+    }
+  }
+
+  endCall(){
+    this.props.confObject.endConference(this.props.roomKey);
+  }
+
+  render(){
+    let cls_smallvid = `${styles.video160}  ${styles.hideObject}`;
+    let self_Sepaker_show = false;
+    if(this.props.streams.length > 1){
+        cls_smallvid = `${styles.video160}`;
+        self_Sepaker_show = true;
+    }
+    
+    let cls_big = `${styles.videoPresenter}`;
+    let cls_sm = '';
+
+    console.log("Presenter " , this.props.onlyPresenter);
+    // if(this.state.selfVideo){
+    if(this.props.onlyPresenter){
+      // cls_tmp = cls_smallvid;
+      cls_sm = `${styles.videoPresenter}`;
+      cls_big = `${styles.video160}`;
+    }else{
+      cls_sm = cls_smallvid;
+      cls_big = `${styles.videoPresenter}`;
+    }
+
+    if(!this.props.streams[0]){
+      self_Sepaker_show = false;
+      cls_sm = `${styles.video160}  ${styles.hideObject}`;
+    }
+    // }else{
+    //   self_Sepaker_show = false;
+    //   cls_sm = `${styles.video160}  ${styles.hideObject}`;
+    // }
+
+    //Check is it Early wait or not?
+    if(this.props.streams.length == 1 && this.props.streams[0] == null){
+      this.amEarly = true;
+    }else{
+      this.amEarly = false;
+    }
+
+    return (
+      <div className={styles.video480}>
+          {/*<div className={styles.videoController} title="Open Video Controllers">
+                      <img onClick={this.showControl.bind(this)} src="/images/white-icons/controller.png" />
+                      <ControlVideo closeControl={this.closeControl.bind(this)} showModal={this.state.showControl} />
+                    </div>*/}
+        {this.props.hosticon ? 
+          <div className={styles.videoController} title={this.props.intl.messages.become_host}>
+            <img onClick={this.showHost.bind(this)} src="/images/white-icons/host-white.png" />
+            <HostControl closeHost={this.closeHost.bind(this)} showModal={this.state.showHost} />
+          </div>
+        : null }
+        {(self_Sepaker_show)?
+                <div className={styles.speakerSelf} title={this.props.intl.messages.become_speaker}>
+                   <img onClick={this.selfSpeaker.bind(this)} src="/images/white-icons/speaker-white.png" />
+                </div>
+        : ''}
+        <div id='dvPresenterScreen' className={cls_big}>
+          {(this.amEarly)? <div className={styles.early}>Presenter/Host not yet joined or left the meeting</div> : ''}
+        </div>
+        <div id="dvSmallScreen" className={cls_sm}>
+
+        </div>
+        <div id='endCall' onClick={this.endCall.bind(this)} className={styles.endBtnPresenter} >
+          <img src="/images/white-icons/end-call.png" />
+        </div>
+      </div>    
+    );
+  }
+
+  //Run Only When No ScrollConf Present
+  setSpeaker(stream){
+    var defIndex = _.findIndex(this.props.streams, ['from', stream.from]);
+    console.log("Def Index", defIndex);
+    if(defIndex > 1){ //0th place is self so skiped, 1th place is spekaer so skipped.
+      this.props.confObject.onlyPresenter(false);
+
+      /*So now remove current speaker from the presenter screen, 
+      so previous speaker will have space to go there.*/
+      let sp_stream = this.props.streams[1];
+      if(sp_stream.showing){
+            let elementId = document.getElementById(sp_stream.elementId).parentElement.id;
+            sp_stream.hide();
+            document.getElementById(sp_stream.elementId).remove();
+      }
+      this.props.confObject.setSpeaker(stream);
+    }else if(defIndex == 0){ //Speaker asking him self to be speaker
+      console.log('Self as speaker While No ScrollConf');
+      this.props.confObject.onlyPresenter(true);
+    }else if(defIndex == 1){ //The requested stream already in speaker area.
+      this.props.confObject.onlyPresenter(false);
+    }
+  }
+
+  SyncSpeaker(from, sender){
+    console.log("Sync Called", from)
+    if(this.props.streams && this.props.noScrollConf){
+        var defIndex = _.findIndex(this.props.streams, ['from', from]);
+        var hostIndex = _.findIndex(this.props.streams, ['from', sender]);
+
+        this.props.confObject.setHostFlag(hostIndex);
+        
+        console.log("Sender Index", defIndex);
+        if(defIndex>=0){
+          this.setSpeaker(this.props.streams[defIndex]);
+        }else{
+          console.log("Stream un-identified", from, this.props.streams[0]);
+          //So check them in attendees list to make sure thats me (myself)
+          var attIndex = _.findIndex(this.props.attendees, ['id', from]);
+
+          if(attIndex>=0){//Wow you found some body, but make sure thats me
+            if(this.props.attendees[attIndex].name == this.props.myid) {
+              //Wow you got it, its me.... now you do what you want
+              this.props.streams[0].from = from;
+              this.setSpeaker(this.props.streams[0]);
+            }
+          }
+        }
+    }
+  }
+
+}
+
+PresenterConf.contextTypes = {
+  router : React.PropTypes.object
+};
+
+PresenterConf.propTypes = {
+  intl: PropTypes.object,
+  token: PropTypes.string,
+  sendStreams: PropTypes.func,
+  confObject: PropTypes.object,
+  selfVideo: PropTypes.bool,
+  selfAudio: PropTypes.bool,
+  publishVideo: PropTypes.bool,
+  streams: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  attendees: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  codec: PropTypes.string,
+  transport: PropTypes.string,
+  onlyPresenter: PropTypes.bool,
+  myid: PropTypes.string,
+  noScrollConf: PropTypes.bool,
+  iceServers: PropTypes.array,
+  roomKey: React.PropTypes.string,
+};
+
+PresenterConf.defaultProps = { noScrollConf: false, selfVideo: true, selfAudio: true, publishVideo: true };
+
+export default connect()(injectIntl(PresenterConf));

@@ -1,0 +1,102 @@
+.googleDiv button { font-size: 16px !important; font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important; color: rgba(255, 255, 255, 0.7) !important; background-color: #4c69ba;  }
+.gIcong { width: 46px; float: left; border-right: 2px solid rgba(255, 255, 255, 0.7);  }
+.gTextg {}
+.inputGroupff { width: 46px; float: left; border-right: 2px solid rgba(255, 255, 255, 0.7); margin-right: -23px; }
+.centerLoginSocial { text-align: center; }
+.centerLoginSocial1 { margin: 0 auto; width: 50%; display: inline-block; padding: 0 4%; }
+.centerLoginSocial2 { margin: 0 auto; width: 50%; display: inline-block; padding: 0 4%; }
+.resetMainDiv { width: auto !important ; display: grid; }
+.resetinnerDiv{ width: auto !important; display: grid; text-align: center; margin: 0 auto; }
+.resetPageBlock { background: rgba(255, 255, 255, 0.4); padding: 16px 24px; }
+.resetTextBtn { background-color: #008abc; padding: 8px 12px; font-size: 16px; border-radius: 4px; }
+.resetHeadText { color: #008abc; text-align: center; padding: 24px 8px 16px 8px; }
+.resetHeadText h2 { padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.7); }
+.resetMsgText { color: #ffffff; position: relative; }
+.reestBtnSign { display: block; text-align: center; padding-top: 40px; padding-bottom: 8px; }
+.loginPad { width: 370px; background-color: #fff; margin:0 auto; }
+.loginPad h2 { text-align: center; color: rgba(0,0,0,0.87); padding: 0; margin: 0 0 16px 0; }
+.loginPad p { text-align: center; color: rgba(0,0,0,0.54); margin-bottom: 30px; }
+.actionLinks { padding: 20px 0px 12px; text-align: center; }
+.actionSeprate{ border-bottom: 1px dotted rgba(0,0,0,0.12); padding-bottom: 20px; }
+
+/*NEW LOGIN CSS*/
+/*NEW LOGIN*/
+.loginBox {position: relative; width: 375px; padding: 16px; margin: 0 auto; margin-top: 7.5%;}
+.loingLogoBlock {display: block; padding: 16px 0;text-align: center; margin: 0 0 16px 0; position: relative;}
+.loingLogoBlock>img {/*display: block;*/ width: 160px; height: auto;}
+
+.formSignin>.welcomeTxt {  padding: 0; margin: 0 0 16px;text-align: center; font-size: 16px; color: rgba(255,255,255,1); }
+.formSignin>.welcomeTxt>.pleaseTxt {color: rgba(255,255,255,0.7);}
+.formSignin input[type="text"], .formSignin input[type="password"] {margin-bottom: 10px;height: 45px;border-radius: 2px;background-color: #1a96c3;border: none;outline: none;color: rgba(255,255,255,0.75);box-shadow: initial; }
+.formSignin input:focus, .formSignin input:active {box-shadow: none; outline: none;}
+.formSignin input::-webkit-input-placeholder { color: rgba(255,255,255,0.5);}
+.formSignin input::-moz-placeholder {color: rgba(255,255,255,0.5);}
+.formSignin input:-ms-input-placeholder {color: rgba(255,255,255,0.5);}
+.formSignin input:-moz-placeholder {color: rgba(255,255,255,0.5);}
+.btnSignin {width: 100%; box-shadow: none;font-size: 16px;color: rgba(255,255,255,0.7);border: none;background-color: #1a96c3;height: 45px;border-radius: 2px;text-align: center;white-space: nowrap;vertical-align: middle;-ms-touch-action: manipulation;touch-action: manipulation;cursor: pointer;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none; /*text-transform: uppercase;*/ margin-top: 0px;}
+.signupAction {position: relative; padding: 16px 0 8px; margin: 0; display: block; }
+.signupAction>span>a {color: rgba(255,255,255,0.7); font-size: 13px; font-weight: bold; text-decoration: none; -ms-transition: all 0.4s ease; -o-transition: all 0.4s ease; -moz-transition: all 0.4s ease; -webkit-transition: all 0.4s ease; transition: all 0.4s ease;}
+.signupAction>span>a:hover {color: rgba(255,255,255,1);}
+.rememberMe {display: block; padding: 0px 0px; margin: 0;}
+.txtRememberMe {display: inline-block; font-size: 13px; color: rgba(255,255,255,0.5); padding: 6px 0 0 0;}
+.loginSwitch {position: relative;display: inline-block;width: 42px;height: 15px;padding: 0;margin: 0;top: 4px;}
+.loginSwitch input {display:none;}
+.loginSlider {position: absolute;cursor: pointer;top: 0;left: 0;right: 0;bottom: 0;background-color: #1a96c3;-webkit-transition: .4s;transition: .4s;}
+.loginSlider:before {position: absolute;content: "";height: 15px;width: 15px;left: 0px;bottom: 0px;background-color: #fff;-webkit-transition: .4s;transition: .4s;box-shadow: 0 1px 2px rgba(0,0,0,0.2);}
+.loginSwitch input:checked + .loginSlider {background-color: #00ec4d;}
+.loginSwitch input:focus + .loginSlider {box-shadow: 0 0 1px #00ec4d;}
+.loginSwitch input:checked + .loginSlider:before {-webkit-transform: translateX(26px);-ms-transform: translateX(26px);transform: translateX(26px);}
+.googleDiv { margin: 10px 0px; }
+.googleDiv>button .gmailIcon { font-size: 23px } 
+.loginLine { width: 100%; text-align: center; line-height: 0.1em; margin: 10px 0 20px; position: relative; border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
+.loginLine::after {content: "OR"; position: absolute; z-index: 1; color: rgba(255, 255, 255, 0.7); top: -14px; left: calc(50% - 22px); background-color: #008abc; padding: 12px; }
+
+/*  css for guest behind net login page - Manish  */
+.guestBehindNetText {margin-top: 16px; text-align: center;}
+.guestBehindNetBtn {margin-left: 16px;}
+.btnBlockJoinConference {text-align: center;}
+.guestBehindNetbtnColor {background-color: #ff0000; opacity: 0.7;}
+.btnJoinConference {border: none !important; text-transform: uppercase !important; padding: 8px 12px !important; font-weight: 600 !important; height: auto !important; width: auto !important; font-size: 14px !important; background-color: #008abc !important; border-radius: 2px !important; box-shadow: 0 4px 12px rgba(0, 0, 0, .26) !important; color: #fff !important;}
+
+/*Facebook button CSS*/
+.facebookButton {width: 100%; display: inline-block; background-color: #1a96c3; border: 1px solid transparent; font-size: 16px; font-family: inherit; opacity: 1 !important; padding-top: 10px; padding-bottom: 10px; border-radius: 2px; color: rgba(255,255, 255, 1);}
+.facebookButton i { font-size: 23px; margin-right: 0px;}
+.fontSignin {color: rgba(255,255, 255, 1);}
+
+/* Rounded sliders */
+.loginSlider.round {border-radius: 34px;}
+.loginSlider.round:before {border-radius: 50%;}
+
+/*Logging wait*/
+.loggingWait {display: block; padding: 0; margin: 0; position: relative;}
+.loggingWait>h2 {text-align: center; font-size: 24px; margin-bottom: 16px; color: rgba(255,255,255,0.54);}
+.loggingWait>p {text-align: center; color: rgba(255,255,255,0.54);}
+
+.singBlockFoeget {
+	text-align: center;
+	margin-top: 24px;
+}
+.singInFoeget {
+
+}
+.singInFoeget a {
+	color: rgba(255, 255, 255, .7);
+	text-decoration: none;
+	font-weight: bold;
+}
+.singInFoeget a:hover, .singInFoeget a:focus {
+	color: rgba(255, 255, 255, 1);
+}
+
+/************* RESPONSIVE DESIGN FOR SMALL DEVICES *********************************/
+@media(max-width: 767px) {
+  .loginBox {width: 100%;}
+  .centerLoginSocial1 {width: 100%; display: block; padding: 0 6%;}
+	.centerLoginSocial2 {width: 100%; display: block; padding: 0 6%;}
+
+}
+
+/************* RESPONSIVE DESIGN FOR SMALL DEVICES *********************************/
+@media(min-width: 768px) and (max-width: 991px){
+  
+}

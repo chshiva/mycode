@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+	<html lang="en">
+		<meta charset="utf-8" />
+		<title>JavaScript - Variable</title>
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+			body {background: #fff; padding: 0; margin: 0;}
+			*{ box-sizing:border-box;}
+
+            .container {display: -webkit-flex; display: flex; height: 100vh }
+            .sideNav   {width: 370px; background-color: #fff; border-right: 1px solid rgba(0,0,0,0.12); height: 100vh; position: fixed; }
+            .makeCenterBlock { height: 300px; display: -webkit-flex: ; display: flex; -webkit-align-items: center;  align-items: center; -webkit-justify-content: center; justify-content: center; }
+            .centerBox{ width: 320px; height: 150px; overflow: auto; background-color: #008abc; color: #fff; }
+
+
+            
+            .flexColumn {-webkit-flex: 1; flex: 1; background-color: #f5f5f5; margin-left: 370px; }
+            
+            .rowBlockA {-webkit-display: flex; display: flex;
+            }
+
+/* 
+            .flex3Col { -webkit-flex: 0.143; flex: 0.143;background-color: #ffcc00; }
+
+            .flex4Col { -webkit-flex: 0.143; flex: 0.143;background-color: #ffcc00; }
+ */
+            .rowBlockB {-webkit-display: flex; display: flex; }
+
+            .videoBox { flex: 1 1 auto; border: 1px dotted #000;}
+            
+            .flexCol3 {-webkit-flex: 1; flex: 1; flex-grow:1;}
+
+            .blue {background-color: #008abc;}
+            .black {background-color: #333;}
+            .white {background-color: #fff;}
+
+          
+
+.outer {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.inner {
+  flex: 1 1 auto;
+  border: 1px solid grey;
+  position: relative;
+}
+.inner:before {
+  content: "";
+  display: block;
+  padding-top: 100%;
+  /* initial ratio of 1:1*/
+}
+.content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+/* otehr ratios */
+
+.ratio2_1:before {
+  padding-top: 50%;
+}
+.ratio1_2:before {
+  padding-top: 200%;
+}
+.ratio4_3:before {
+  padding-top: 75%;
+}
+.ratio16_9:before {
+  padding-top: 56.25%;
+}
+
+            .flex1Col { flex: 1; background-color: #ff5600; }
+
+            .flexVertical { flex-direction: column;  display: flex;}
+            .flex2Col { flex: 0.332; background-color: #ffcc00;}
+
+            .flex3Col { flex: 0.5;background-color: #ffcc00; }
+        </style>	
+        
+	</head>
+	<body>
+    <div class="container">
+      <aside class="sideNav"> side Nav </aside>
+      <div class="flexColumn">
+        <section>
+          <div class="rowBlockA">
+            <div class="flex1Col">
+              <div class="inner ratio16_9">
+                <div class='content'>Aspect ratio of 16:9</div>
+              </div>
+            </div>
+            <div class="flex2Col">
+                 <div class="inner ratio16_9">
+                    <div class='content'>Aspect ratio of 16:9</div>
+                 </div>
+                  <div class="inner ratio16_9">
+                     <div class='content'>Aspect ratio of 16:9</div>
+                  </div>
+                  <div class="inner ratio16_9">
+                     <div class='content'>Aspect ratio of 16:9</div>
+                  </div>
+            </div>
+            <!-- <div class="flex3Col">
+                <div class="inner ratio16_9">
+                   <div class='content'>Aspect ratio of 16:9</div>
+                </div>
+                <div class="inner ratio16_9">
+                   <div class='content'>Aspect ratio of 16:9</div>
+                </div>
+            </div> -->
+          </div>
+          <div class="rowBlockB">
+              <div class="inner ratio16_9">
+                  <div class='content'>Aspect ratio of 16:9</div>
+               </div>
+               <div class="inner ratio16_9">
+                  <div class='content'>Aspect ratio of 16:9</div>
+               </div>
+               <div class="inner ratio16_9">
+                  <div class='content'>Aspect ratio of 16:9</div>
+               </div>
+               <div class="inner ratio16_9">
+                   <div class='content'>Aspect ratio of 16:9</div>
+                </div>
+               <!-- <div class="inner ratio16_9">
+                  <div class='content'>Aspect ratio of 16:9</div>
+               </div>
+               <div class="inner ratio16_9">
+                  <div class='content'>Aspect ratio of 16:9</div>
+               </div> -->
+          </div>
+        </section>
+
+        <!-- <div class="outer">
+          <div class="inner ratio16_9">
+            <div class='content'>Aspect ratio of 16:9</div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+	</body>
+
+
+
+
+</html>
