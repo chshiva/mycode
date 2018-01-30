@@ -10,6 +10,6 @@ COPY . /usr/src/app
 
 ENV NODE_ENV production
 
-EXPOSE 800
+EXPOSE 8030
 CMD ["npm", "run", "bs"]
 
