@@ -1,7 +1,7 @@
 const config = {
-  mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/instavc_be',
+  mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/instavc_shiva',
 
-  port: process.env.PORT || 3023,
+  port: process.env.PORT || 8002,
   confLink : 'https://test9.instavc.com/',
   domin : process.env.DOMAIN || 'test9.instavc.com',
   language : 'en',
