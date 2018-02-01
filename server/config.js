@@ -2,8 +2,8 @@ const config = {
   mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/instavc_be',
 
   port: process.env.PORT || 8002,
-  confLink : 'https://rp.instavc.com/',
-  domin : process.env.DOMAIN || 'rp.instavc.com',
+  confLink : 'https://jenkinstest.instavc.com/',
+  domin : process.env.DOMAIN || 'jenkinstest.instavc.com',
   language : 'en',
 	location : [
 							['https://localmcu.instavc.com', 'India Development'],
