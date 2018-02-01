@@ -1,0 +1,32 @@
+.stepContent {padding: 16px 0; position: relative; display: flex; flex-direction: column;}
+.stepTxt{color: #007fc0;}
+.stepContent h2 {text-align: left; font-weight: 400;}
+
+.expansionsBlock {position: relative; margin-bottom: 16px; height: 100%; display: block;}
+.contentStyle { padding: 0 16px;  background-color: #fff; margin-top: -16px; }
+.stepsBox {padding:24px;}
+
+/*************CSS for Stepper Components **********/
+.listInline {float: left; list-style: none; padding: 0; margin:0;}
+.listInline li {display: inline-block; padding-right: 5px; padding-left: 5px;}
+.textFieldBreak { display: flex; position: relative; justify-content: space-around; margin-bottom: 0px; }
+.textFieldBreak .textItemBlock {flex-grow: 1; margin-right:16px; margin-bottom: 16px; padding-right: 0;}
+
+.heading { font-size: 16px;}
+.secondaryHeading { font-size: 16px; color: rgba(0,0,0,0.54); }
+/*.icon { vertical-align: bottom; height: 20px; width: 20px;}*/
+.detailsBox {align-items: center;}
+.expandedBox {background-color: #fafafa !important;}
+
+/* MOBIE DEVICES */
+@media screen and (max-width: 767px) and (orientation: portrait) {
+.stepsBox {padding:16px 24px !important;}
+
+}
+
+
+/* TABLET DEVICES */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+
+
+	}

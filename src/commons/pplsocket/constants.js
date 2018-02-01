@@ -1,0 +1,3 @@
+export const SET_ROOM_ID = 'SET_ROOM_ID';
+export const SET_ROOM_MESSAGES = 'SET_ROOM_MESSAGES';
+export const SET_REJECT_CALL = 'SET_REJECT_CALL';

@@ -1,0 +1,69 @@
+/**************Conference Layout******************/
+
+.layoutMain {position: relative; top: 0px; padding: 0; margin:0px; height: 100vh;}
+
+/******Left Container*******/
+
+.layoutLeftContainer {position: relative; padding: 0; width: calc(100% - 400px); height: 100vh;}
+.tabHeader {display: flex; align-items: center; margin: 0; position: fixed; z-index: 1; left: 0; right: 400px; top: 0px; bottom: initial; box-shadow: 0 -8px 8px -8px rgba(0,0,0,0.12); padding: 24px 0px; box-sizing: border-box; border-bottom: 1px solid rgba(0,0,0,0.12); padding: 0 16px; color: #fff; background-color:#007fc0;  background-color: var(--primaryColor);}
+.mainLayout {padding: 0; top: 53px; position: relative; height: calc(100vh - 53px); overflow-y: auto; overflow-x: hidden; box-sizing: border-box; margin-right: 0px;}
+.tabIcon { display: inline-block;}
+.tabLabel {text-transform: capitalize !important; min-width: 120px !important;}
+
+.tabIcon { width: 24px; color: rgba(0, 0, 0, 0.54); height: 24px; flex-shrink: 0; margin-right: 16px;}
+.tabIcon>img {width: 100%; height: 100%; display: block;}
+
+/************Right Container*****************/
+
+.layoutRightBlock {position: fixed; width: 400px; top: 0; right: 0; bottom: 0; background-color: #fff; z-index: 2; display: flex; flex-direction: column; box-shadow: -4px 0 16px rgba(0,0,0,0.28);}
+.layoutRightHeader { position: absolute; display: flex; z-index: 3; top: 0; border-bottom: 1px solid rgba(0,0,0,0.12); padding: 8px 16px; right: 0; left: 0; height: 53px; box-sizing: border-box; flex:0 0 auto;}
+.layoutRightHeader >.buttonStyle {padding:0; margin-right: 8px; flex-grow: 1;}
+
+.layoutRightContainer {position: relative; padding: 0 16px 16px; margin-top:53px; flex:1 1 auto; height: calc(100vh - 53px);  overflow-x: hidden; overflow-y: auto;}
+.btnTxt {color: #007fc0;  color: var(--primaryColor); font-size: 12px; padding:0; margin: 0;}
+.btnIcon {color: rgba(0,0,0,0.54); margin:0px; padding:0;}
+.btnpullRight {position: absolute !important; right: 0;}
+.textArea {margin-bottom: 16px !important; border:1px solid rgba(0,0,0,0.12) !important; background-color: #fafafa; box-sizing:border-box;}
+.textArea textarea {padding: 8px;}
+.noteHeading {color: rgba(0,0,0,0.87); padding-top: 16px; margin: 0; font-size: 20px; font-weight: 400; }
+.subNote {padding: 0; margin:0 0 8px; color: rgba(0,0,0,0.54); font-size: 14px; font-weight: 400;}
+.writeNotes {display: block; padding-bottom: 16px; margin: 0; position: relative; border-bottom: 1px dotted rgba(0,0,0,0.12);}
+
+.dialogBox {min-width: 600px;}
+.dialogHeading{ padding:24px; margin-bottom: 16px; align-items: center; display: flex; border-bottom: 1px solid rgba(0,0,0,0.12); }
+.dialogIcon{width:24px; height:24px; flex: 0 0 auto; display: inline-block;}
+.dialogIcon img {width: 100%; height: 100%; padding:0; margin: 0;}
+.dialogHeadingTxt {padding:0 !important; flex: 1 1 auto;}
+
+/******************* Floating Window *****************/
+.floatingWindow {width:320px; height:180px;  position: absolute; bottom:84px; right: 8px; display: block; z-index: 999999; box-shadow: 0 0 24px rgba(0,0,0,0.40); cursor: move;}
+
+/*********************Add Remove Buttons ********************************/
+.removePanel{display: inline-block; flex: 0 0 auto; margin-left: 8px;}
+.addPanel{align-items: center; display: flex;  padding: 16px 0 !important;}
+.addBtn {box-shadow: none !important; background-color: transparent !important; position: absolute !important;right:40px; color: #007fc0 !important;  color: var(--primaryColor) !important; top: 24px;}
+.addIconTxt {font-weight: 550;}
+
+.closeIcon {position: absolute !important; right: 0;  top: 0;}
+
+
+/* MOBIE DEVICES */
+@media screen and (max-width: 767px) and (orientation: portrait) {
+    .layoutLeftContainer {position: relative; padding: 0; width: 100%; height: 100vh;}
+    .layoutRightBlock {position: relative; width: 100%; top: 0; right: 0; bottom: 0; background-color: #fff; z-index: 2; display: flex; flex-direction: column;}
+    .layoutRightHeader { position: absolute; display: flex; z-index: 3; top: 0; border-bottom: 1px solid rgba(0,0,0,0.12); padding: 8px 16px; right: 0; left: 0; height: 53px; box-sizing: border-box; flex:0 0 auto;}
+    .layoutRightHeader >.buttonStyle {padding:0; margin-right: 8px; flex-grow: 1;}
+
+    .layoutRightContainer {position: relative; padding: 0 16px 16px; margin-top:53px; flex:1 1 auto; height: calc(100vh - 53px);  overflow-x: hidden; overflow-y: auto;}
+
+    .tabHeader {display: flex; align-items: center; margin: 0; position: fixed; z-index: 1; left: 0; right: 0; top: 0px; bottom: initial; box-shadow: 0 -8px 8px -8px rgba(0,0,0,0.12); padding: 24px 0px; box-sizing: border-box; border-bottom: 1px solid rgba(0,0,0,0.12); padding: 0 16px; color: #fff; background-color:#007fc0;  background-color: var(--primaryColor);}
+    .mainLayout {padding: 0; top: 53px; position: relative; height: calc(100vh - 53px); overflow-y: auto; overflow-x: hidden; box-sizing: border-box; margin-right: 0px;}
+    .noDataBlock {top: 0; }
+    
+}
+
+/* TABLET DEVICES */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+	.layoutMain, .recordsBlock {margin: 0;}
+	
+}

@@ -1,0 +1,29 @@
+.prescPanel{display: flex; flex-direction: row; position: relative; align-items: center; margin-bottom: 12px;}
+
+/******************* NDC Field ***********************/
+.ndcBlock { display: flex; position: relative; justify-content: space-around; margin-bottom: 8px; }
+.ndcBlock .ndcItem {flex-grow: 1; margin-right: 8px;}
+.ndcBlock .ndcItem input {font-size: 16px; font-weight: 500; text-align: center;}
+
+.circle32 {margin: 0 auto; width: 24px; height: 24px; border: 1px solid #f7c164; border: 1px solid var(--callMediumColor); border-radius: 50%;}
+.circle32.filledCircle {background-color: #f7c164; background-color: var(--callMediumColor); color: #a06704; text-align: center; line-height: 23px; font-weight: 500; font-size: 16px; text-transform: uppercase;}
+.circle16 {margin: 0 auto; width: 16px; height: 16px; border: 1px solid #f7c164; border: 1px solid var(--callMediumColor); border-radius: 50%;}
+.circle16.filledCircle {background-color: #f7c164; background-color: var(--callMediumColor); color: #a06704; text-align: center; line-height: 14px; font-weight: 500; font-size: 12px; text-transform: uppercase;}
+.selectWidth {min-width: 120px !important;}
+
+
+/* MOBIE DEVICES */
+@media screen and (max-width: 767px) and (orientation: portrait) {
+	.righAbsBox {padding: 8px;}
+	.presListItemZero {width: auto; margin-right: 16px;}
+	.presListGroup { margin-bottom: 24px; margin-top: -12px; }
+	.presTitleBox {padding: 0;}
+	.topInfoBox {margin: 0 -24px 16px;}
+	.topRightListBox {margin-left: 24px;}
+}
+
+/* TABLET DEVICES */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+	
+
+}

@@ -1,0 +1,255 @@
+.profileBlock {
+	position: relative;
+	padding: 24px;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.28);
+	margin-bottom: 8px;
+}
+
+.btmBtnBlock {
+	position: relative;
+	display: flex;
+	margin-top: 48px;
+}
+
+.btnBlockInline {
+	flex: 0 0 auto;
+	margin-right: 16px;
+}
+
+.inputHidden {
+	display: none;
+}
+
+.infoInlineBlock {
+	position: relative;
+	padding: 0;
+	margin: 0;
+}
+
+.infoInlineBlock>ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.infoInlineBlock>ul>li {
+	display: flex;
+	padding: 15px 0;
+}
+
+.span50 {
+	width: 50%;
+	font-size: 1rem;
+}
+
+.txtProp {
+	color: rgba(0, 0, 0, 0.87);
+	font-weight: 500;
+}
+
+.txtVal {
+	color: rgba(0, 0, 0, 0.54);
+}
+
+.txtVal>span {
+	padding: 0 4px;
+	position: relative;
+}
+
+.txtVal>span:after {
+	position: absolute;
+	content: ",";
+}
+
+.tabTransparent {
+	background-color: transparent !important;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+	box-shadow: none !important;
+}
+
+.hospInfo {
+	margin-bottom: 8px;
+	background-color: #fff;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+}
+
+.hospInfo>.hospInfoHeader {
+	position: relative;
+	padding: 16px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.hospInfo>.hospInfoHeader>.hospInfoHeadingTxt {
+	font-size: 20px;
+	color: rgba(0, 0, 0, 0.87);
+	padding: 0;
+	margin: 0;
+	word-break: break-all;
+	font-weight: 400;
+	flex: 1 1 auto;
+}
+
+.hospInfo>.hospInfoBody {
+	position: relative;
+	padding: 0 16px 16px;
+	display: flex;
+	flex-direction: row;
+}
+
+.paperTopActionBar {
+	flex: 0 0 auto;
+}
+
+.actionIconBox {
+	position: relative;
+	width: 32px;
+	height: 32px;
+	padding: 4px;
+	color: rgba(0, 0, 0, 0.54);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+}
+
+.actionIconBox:hover {
+	color: rgba(0, 0, 0, 0.87);
+}
+
+.infoPaper {
+	margin-bottom: 8px;
+	border-right: 1px solid rgba(0, 0, 0, 0.12) !important;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+.infoPaper:last-child {
+	margin: 0;
+	border: none;
+}
+
+.infoPaper>.paperHeader {
+	position: relative;
+	padding: 16px;
+	display: flex;
+	align-items: center;
+}
+
+.infoPaper>.paperHeader>.paperHedingTxt {
+	font-size: 0.875rem;
+	color: rgba(0, 0, 0, 0.54);
+	padding: 0;
+	margin: 0;
+	word-break: break-all;
+	font-weight: 550;
+	flex: 1 1 auto;
+}
+
+.infoPaper>.paperBody {
+	position: relative;
+	padding: 16px;
+}
+
+.comStar {
+	color: #ec655f;
+	color: var(--errorColor);
+}
+
+.inputControl {
+	width: 100%;
+	box-sizing: border-box;
+	border: none;
+	border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+	font-size: 14px;
+	color: rgba(0, 0, 0, 0.87);
+}
+
+.inputControl:focus {
+	outline: none !important;
+	box-shadow: none !important;
+	border-bottom: 2px solid #2196f3;
+	border-bottom: 2px solid var(--primaryColor);
+}
+
+.changePswdBlock {
+	position: relative;
+	padding: 0;
+	margin: 0;
+}
+
+/* MOBIE DEVICES */
+
+@media screen and (max-width: 767px) and (orientation: portrait) {
+	.righAbsBox {
+		padding: 8px;
+	}
+	.docInfoBlock>.ptnDetails {
+		text-align: left !important;
+	}
+	.bottomChatHistory {
+		margin: 0 0 48px 0;
+	}
+	.colseBtmBox {
+		display: block;
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 48px;
+		background-color: rgba(0, 0, 0, 0.9);
+		box-sizing: border-box;
+		text-align: center;
+		padding: 12px 16px;
+		color: #fff;
+		cursor: pointer;
+	}
+}
+
+/* TABLET DEVICES */
+
+@media screen and (min-width: 768px) and (max-width: 991px) {
+	.colseBtmBox {
+		display: none;
+	}
+}
+
+/*************************OLD CODE *********************************/
+
+/*.profileCard>.headlingTxt {color: rgba(0,0,0,0.54); font-size: 16px; font-weight: 500; margin: 0 0 20px;}
+.docInfoBlock {position: relative; display: flex; align-items: center; margin-bottom: 16px;}
+.docInfoBlock>.avacircle80 {flex: 0 0 auto; width: 78px; height: 78px; border-radius: 50%; margin-right: 16px; border: 2px solid #007fc0; border: 2px solid var(--primaryColor);}
+.docInfoBlock>.avacircle80>img {display: block; width: 100%; height: 100%; border-radius: 50%;}
+.docInfoBlock>.docDetails {flex: 1 1 auto; padding: 0; margin: 0;}
+.docInfoBlock>.docDetails>.docName {padding: 0; margin: 0 0 8px; font-size: 20px; font-weight: 500; color: rgba(0,0,0,0.87);}
+.docInfoBlock>.docDetails>.callTxt,
+.docInfoBlock>.ptnDetails>.callTxt {padding: 0; margin: 0; font-size: 14px; color: rgba(0,0,0,0.54);}
+
+.blockDiv {position: relative; padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.12);}
+.blockDiv:last-child {border: none;}
+
+.bottomChatHistory {position: relative; display: flex; align-items: center; margin: 16px 0 0 0;}
+.bottomChatTxt {flex: 0 0 auto; padding: 8px 16px; background-color: #e4e4e4; }
+.bottomChatHBtn {flex: 0 0 auto; padding: 0px; margin:0; }
+.colseBtmBox {display: none;}
+
+/* MOBIE DEVICES */
+
+/*@media screen and (max-width: 767px) and (orientation: portrait) {
+	.righAbsBox {padding: 8px;}
+	.docInfoBlock>.ptnDetails {text-align: left !important;}
+	.bottomChatHistory { margin: 0 0 48px 0;}
+ 	.colseBtmBox {display: block; position: fixed; left: 0; right: 0; bottom: 0; height: 48px; background-color: rgba(0,0,0,0.9); box-sizing: border-box; text-align: center; padding: 12px 16px; color: #fff; cursor: pointer;}
+}*/
+
+/* TABLET DEVICES */
+
+/*@media screen and (min-width: 768px) and (max-width: 991px) {
+	.colseBtmBox {display: none;}
+
+}*/

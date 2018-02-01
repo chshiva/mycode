@@ -1,0 +1,46 @@
+.reportsBlock   {padding: 8px 16px;}
+
+.patInfoBlock {position: relative; display: flex; align-items: center; margin-bottom: 16px;}
+.patInfoBlock>.avacircle48 {flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; margin-right: 16px; border: 2px solid #007fc0; border: 2px solid var(--primaryColor);}
+.patInfoBlock>.avacircle48>img {display: block; width: 100%; height: 100%; border-radius: 50%;}
+.patInfoBlock>.ptnDetails {flex: 1 1 auto; padding: 0; margin: 0;}
+.patInfoBlock>.docDetails>.callTxt,
+.patInfoBlock>.ptnDetails>.callTxt {padding: 0; margin: 0; font-size: 14px; color: rgba(0,0,0,0.54);}
+.patInfoBlock>.ptnDetails>.ptnName {padding: 0; margin: 0; font-size: 16px; font-weight: 600; color: rgba(0,0,0,0.54);}
+
+.reportCardContent {padding: 0; margin: 0;}
+.reportList {padding: 0; margin: 0;}
+.reportListItem {padding: 8px 16px !important; font-size: 16px; margin:0 0 16px; background-color: #fafafa; border: 1px solid rgba(0,0,0,0.12);}
+.reportListItem:last-child {margin: 0;}
+.reportHeadlineTxt {font-size: 16px !important; margin: 0px !important; margin: 0; font-weight: 400; color: #007fc0; color: var(--primaryColor);}
+
+.dCardHeadline { padding: 16px 16px 0; font-size: 14px; color: rgba(0,0,0,0.54); }
+
+
+/* NO DATE BLOCK */
+.noDataBlock {padding: 0; margin: 0; list-style: none;  display: -webkit-box; display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex; align-items: center; justify-content: center; height: calc(100% - 240px); position: relative;
+    top: 132px;}
+.nodDataScreen {width: 240px; position: relative; display: block;}
+.nodDataScreen>.circle240 {width: 240px; height: 240px; border-radius: 50%; background-color: #f1f1f1; padding: 72px; box-sizing: border-box;}
+.nodDataScreen>.circle240>img {width: 100%; height: 100%; display: block;}
+.nodataTxt {
+    font-size: 24px;
+    text-align: center;
+    font-weight: 500;
+    color: rgba(0,0,0,0.54);
+    margin-top: 32px;
+}
+
+
+
+/* MOBIE DEVICES */
+@media screen and (max-width: 767px) and (orientation: portrait) {
+	.reportsBlock {top: 0; margin: 0; height: calc(100% - 222px); padding: 8px 8px 0; }
+	
+}
+
+/* TABLET DEVICES */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+	.reportsBlock {margin: 0;}
+	
+}

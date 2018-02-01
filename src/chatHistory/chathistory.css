@@ -1,0 +1,21 @@
+.chatHistoryListGroup {display: flex; padding: 0px;}
+.chatHistoryListGroup>ul {list-style-type: none; padding: 0; margin: 0;}
+.chatHistoryListGroup>ul>li {display: block; padding: 12px 16px;}
+.chatHistoryListGroup>ul>li:nth-child(even) {background-color: #fafafa;}
+
+.docChatMsg {display: block; padding: 0; margin: 0;}
+.smgTxt {padding: 0; margin: 0;}
+.docName {color: #F44336; color: var(--muiRed); font-weight: 500;}
+.patnName {color: #009688; color: var(--primaryColor); font-weight: 500;}
+.chatDate {color: rgba(0,0,0,0.38); font-weight: 550; padding: 12px; display: block;}
+
+/* MOBIE DEVICES */
+@media screen and (max-width: 767px) and (orientation: portrait) {
+	
+}
+
+/* TABLET DEVICES */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+	
+
+}

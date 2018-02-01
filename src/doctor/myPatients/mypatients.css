@@ -1,0 +1,59 @@
+.dashboardMain {position: relative; top: 64px; padding: 0 16px; margin-left: 320px; margin-right: 0px;}
+.dashboardRightBlock {position: fixed; width: 400px; top: 64px; right: 0; bottom: 0; background-color: #fff; z-index: 2;}
+.dashboardContainer {position: relative; height: calc(100vh - 64px);}
+.displayCardBlock 	{top: 115px; position: relative; height: calc(100% - 115px); overflow-y: auto; overflow-x: hidden; box-sizing: border-box; padding: 8px 16px 0 8px; margin-right: -16px;}
+
+.dCardHeadline { padding: 16px 16px 0; font-size: 14px; color: rgba(0,0,0,0.54); }
+
+
+/* MOBIE DEVICES */
+@media screen and (max-width: 767px) and (orientation: portrait) {
+	.dashboardMain {position: relative; top: 62px; padding: 0 16px; margin-left: 0px; margin-right: 0;}
+	.dashboardContainer {position: relative; height: calc(100vh - 62px);}
+	.noDataBlock {top: 0; }
+}
+
+/* TABLET DEVICES */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+	.dashboardMain, .cardDisplayBlock {margin: 0;}
+}
+
+
+
+/******************************************************/
+.recordsBlock   {padding: 8px 16px;}
+.patientListHeader{font-size: 20px; color: rgba(0,0,0,0.87); padding: 0; margin: 0; word-break: break-all;font-weight: 400; flex: 1 1 auto;}
+.patInfoBlock {position: relative; display: flex; align-items: center; margin: 16px 0;}
+.patInfoBlock>.avacircle48 {flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; margin-right: 16px; border: 2px solid #007fc0; border: 2px solid var(--primaryColor);}
+.patInfoBlock>.avacircle48>img {display: block; width: 100%; height: 100%; border-radius: 50%;}
+.patInfoBlock>.ptnDetails {flex: 1 1 auto; padding: 0; margin: 0;}
+.patInfoBlock>.docDetails>.callTxt,
+.patInfoBlock>.ptnDetails>.callTxt {padding: 0; margin: 0; font-size: 14px; color: rgba(0,0,0,0.54);}
+.patInfoBlock>.ptnDetails>.ptnName {padding: 0; margin: 0; font-size: 16px; font-weight: 600; color: rgba(0,0,0,0.54);}
+.filterToggle {position: absolute; right: 0; align-items: center; display: flex;}
+
+/* NO DATE BLOCK */
+.noDataBlock {padding: 0; margin: 0; list-style: none;  display: -webkit-box; display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex; align-items: center; justify-content: center; height: calc(100% - 240px); position: relative;
+    top: 132px;}
+.nodDataScreen {width: 240px; position: relative; display: block;}
+.nodDataScreen>.circle240 {width: 240px; height: 240px; border-radius: 50%; background-color: #f1f1f1; padding: 72px; box-sizing: border-box;}
+.nodDataScreen>.circle240>img {width: 100%; height: 100%; display: block;}
+.nodataTxt {
+    font-size: 24px;
+    text-align: center;
+    font-weight: 500;
+    color: rgba(0,0,0,0.54);
+    margin-top: 32px;
+}
+
+
+
+/* MOBIE DEVICES */
+@media screen and (max-width: 767px) and (orientation: portrait) {
+	.recordsBlock {top: 0; margin: 0; height: calc(100% - 222px); padding: 8px 8px 0; }
+}
+
+/* TABLET DEVICES */
+@media screen and (min-width: 768px) and (max-width: 991px) {
+	.recordsBlock {margin: 0;}
+}

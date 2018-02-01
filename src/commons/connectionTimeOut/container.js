@@ -1,0 +1,42 @@
+import React from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import ConnectionTimeOut from './form';
+import * as ConnectionTimeOutService from './services';
+
+
+export default class ConnectionTimeOutContainer extends React.Component {
+    constructor(props) {
+        super(props);
+        this.submitForm = this.submitForm.bind(this);
+    }
+
+    submitForm(formProps) {
+        this.props.actions.login(formProps);
+    }
+
+    render() {
+        return (
+            <div>
+                <ConnectionTimeOut onSubmit={this.submitForm} />
+            </div>
+        )
+    }
+};
+
+/**
+ * Map the state to props.
+ */
+const mapStateToProps = function (state) {
+    return {};
+}
+
+
+/**
+ * Map the actions to props.
+ */
+const mapDispatchToProps = (dispatch) => {
+    return {};
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ConnectionTimeOutContainer);
