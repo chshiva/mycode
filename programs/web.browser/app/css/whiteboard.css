@@ -1,0 +1,68 @@
+.whiteboard{
+    position: fixed;
+    left: 0;
+    top: 40px;
+}
+
+.whiteboard canvas{
+    
+}
+/*whiteboard by Syam*/
+#canvas{background: #fff; border-radius: 0 ; left: 50px !important; border-radius: 3px; margin-top: 5px;}
+#canvas1{background: #ccc; border-radius: 0 ; left: 50px !important; border-radius: 3px;}
+.upper-canvas{left: 50px !important; border-radius: 3px; margin-top: 5px;}
+#title { overflow: hidden; position: relative; }
+/*#command {z-index: 999; position: absolute; background: #00aafa; width: 700px; border-radius: 5px 5px 0 0; box-shadow: 0 2px 2px -1px #59c8fc;}
+#command ul{list-style-type: none; float: left; margin: 0; padding: 5px;}
+#command ul li{float: left; margin: 0 3px 0 0px; }*/
+
+#command {z-index: 999; position: absolute; width: 50px; box-shadow: 0 2px 2px -1px #59c8fc; height: 100%;}
+#command ul{list-style-type: none; float: left; margin: 0; padding: 5px;}
+#command button{width: 40px; text-align: center;}
+#command ul li{margin: 0 0px 2px 0px; text-align: center; color: #fff; font-size: 11px; font-weight: bold;}
+#command input{width: 40px; height: 40px; padding: 2px;}
+#command input.line{padding: 0px;  background: none; height: 18px;}
+/*#command input.line::before, #command input.line:before{content:" "; background: #5BC0DE; border-radius: 2px; margin: 12px 0 0 -8px; width: 14px; height: 14px; position: absolute; z-index: 1000;}*/
+/*.whiteb-controls{background: none repeat scroll 0 0 #00aafa;
+    border-radius: 0px;
+    padding: 10px;}
+.whiteb-controls ul{list-style-type: none;padding: 0; margin: 0}
+.whiteb-controls ul li{margin-bottom: 10px;}*/
+.whiteboard .tooltip-inner {
+    background-color: #000;
+    border-radius: 4px;
+    color: #fff;
+    max-width: 200px;
+    padding: 3px 8px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.whiteboard .svg {
+    background:#31b8f9 url(images/svgexport.png) no-repeat center 5px !important;
+    height: 35px;
+    display: block;
+}
+.whiteboard .svg:hover, .whiteboard .svg:focus, .whiteboard .svg:active {
+    background: #0ba5ef url(images/svgexport.png) no-repeat center 5px !important;
+    display: block;
+}
+
+.whiteboard .dropdown {
+    display: none;
+    position: absolute;
+    left: 50px;
+    width: 300px;
+    top: auto;
+    box-shadow: 2px 3px 2px -1px rgb(204, 204, 204);
+    background-color: #46B8DA;
+    border-radius: 2px;
+}
+.whiteboard .dropdown li {float:left; margin: 10px;}
+.whiteboard .dropdown li button{width: 26px !important; height: 26px;}
+.whiteboard .dropdown li button img{width:10px;}
+.whiteboard .btn-info{background-color: #31b8f9 !important; border:1px solid rgba(250,250,250, 0.4) !important;}
+.whiteboard .btn-info:hover{background-color: #0ba5ef !important;}
+.whiteboard .btn-info:focus, .btn-info:active{background-color: #0ba5ef !important; border:1px solid rgba(250,250,250, 0.7) !important;}
+
+/*End Whiteboard */
