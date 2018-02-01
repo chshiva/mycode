@@ -29,7 +29,7 @@ app.get('*', (req, res, next) => {
     res.sendFile(path.join(__dirname, '/index.html'));
 });
 
-app.listen(8001, (error) => {
+app.listen(8002, (error) => {
     if (error) {
         console.log(`Error in server startup`, error);
         process.exit(1);
