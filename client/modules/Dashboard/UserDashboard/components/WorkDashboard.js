@@ -114,8 +114,13 @@ export class WorkDashboard extends Component {
       let obj = {
         current : id, topicList : this.props.workDashboardData.topicList, topicContent : this.props.workDashboardData.topicContent, tid : this.props.workDashboardData.tid,
         conductQuestion : this.props.workDashboardData.conductQuestion, questionnaireId: this.props.workDashboardData.questionnaireId, questionnaireName:this.props.workDashboardData.questionnaireName,
-        pdfView : this.props.workDashboardData.pdfView, fileId : this.props.workDashboardData.fileId,
+        pdfView : this.props.workDashboardData.pdfView, ssPdfView : this.props.workDashboardData.ssPdfView, pdfFileName : this.props.workDashboardData.pdfFileName, fileId : this.props.workDashboardData.fileId, whiteBoardData : this.props.workDashboardData.whiteBoardData, 
         sync : this.props.workDashboardData.sync, assignmentList : this.props.workDashboardData.assignmentList, pollList : this.props.workDashboardData.pollList,
+        waitforview: this.props.workDashboardData.waitforview, topicContentDataDetails : this.props.workDashboardData.topicContentDataDetails,
+        scormView: this.props.workDashboardData.scormView, scormFileName: this.props.workDashboardData.scormFileName
+      }
+      if (this.props.workDashboardData.topicContent == false && this.props.workDashboardData.conductQuestion == false && this.props.workDashboardData.pdfView == false && this.props.workDashboardData.scormView == false) {
+        obj["topicList"] = true;
       }
       if (id == "handraise") {
         obj['handraiseCount'] = 0;
@@ -140,7 +145,7 @@ export class WorkDashboard extends Component {
           syncCurrent : ''
         };
         let workDashboardData = this.props.workDashboardData
-        if (workDashboardData.topicContent == false && workDashboardData.conductQuestion == false && workDashboardData.pdfView == false) {
+        if (workDashboardData.topicContent == false && workDashboardData.conductQuestion == false && workDashboardData.pdfView == false && this.props.workDashboardData.scormView == false) {
           setobj['topicList'] = true;
         }
         this.props.dispatch(setWorkDashboard(setobj));
@@ -158,7 +163,7 @@ export class WorkDashboard extends Component {
           current : id
         };
         let workDashboardData = this.props.workDashboardData
-        if (workDashboardData.topicContent == false && workDashboardData.conductQuestion == false && workDashboardData.pdfView == false) {
+        if (workDashboardData.topicContent == false && workDashboardData.conductQuestion == false && workDashboardData.pdfView == false && this.props.workDashboardData.scormView == false) {
           setobj['topicList'] = true;
         }
         this.props.dispatch(setWorkDashboard(setobj));
@@ -319,8 +324,10 @@ export class WorkDashboard extends Component {
     let objEntity = {
         current : this.props.workDashboardData.current, topicList : this.props.workDashboardData.topicList, topicContent : this.props.workDashboardData.topicContent, tid: this.props.workDashboardData.tid,
         conductQuestion : this.props.workDashboardData.conductQuestion, questionnaireId: this.props.workDashboardData.questionnaireId, questionnaireName:this.props.workDashboardData.questionnaireName, 
-        pdfView : this.props.workDashboardData.pdfView, fileId : this.props.workDashboardData.fileId,
-        sync : !this.props.workDashboardData.sync, ssPdfView : this.props.workDashboardData.ssPdfView, pdfFileName : this.props.workDashboardData.pdfFileName, showButtons : this.props.workDashboardData.showButtons
+        pdfView : this.props.workDashboardData.pdfView, ssPdfView : this.props.workDashboardData.ssPdfView, pdfFileName : this.props.workDashboardData.pdfFileName, fileId : this.props.workDashboardData.fileId, whiteBoardData : this.props.workDashboardData.whiteBoardData,
+        sync : !this.props.workDashboardData.sync, ssPdfView : this.props.workDashboardData.ssPdfView, pdfFileName : this.props.workDashboardData.pdfFileName, showButtons : this.props.workDashboardData.showButtons,
+        waitforview: this.props.workDashboardData.waitforview, topicContentDataDetails : this.props.workDashboardData.topicContentDataDetails,
+        scormView: this.props.workDashboardData.scormView, scormFileName: this.props.workDashboardData.scormFileName
       }
     /*let objEntity = this.props.workDashboardData;
     objEntity['sync'] = !this.props.workDashboardData.sync;*/

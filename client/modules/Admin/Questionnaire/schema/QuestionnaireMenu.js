@@ -52,10 +52,22 @@ export const questionnaireViewSubMenu = {
 		]
 }
 
+export const scormQuestionnaireViewSubMenu = {
+	menus: [
+			{_id: "lnkViewQuestionnaire", text: <FormattedMessage id ="basic_info"/>, actionType: "Function", action: null},
+		]
+}
+
 export const questionnaireEditSubMenu = {
 	menus: [
 			{_id: "lnkViewQuestionnaire", text: <FormattedMessage id ="basic_info"/>, actionType: "Function", action: null},
 			{_id: "lnkViewQuestions", text: <FormattedMessage id ="questions"/>, actionType: "Function", action: null},
+		]
+}
+
+export const scormQuestionnaireEditSubMenu = {
+	menus: [
+			{_id: "lnkViewQuestionnaire", text: <FormattedMessage id ="basic_info"/>, actionType: "Function", action: null},
 		]
 }
 

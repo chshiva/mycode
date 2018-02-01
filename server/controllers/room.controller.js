@@ -90,7 +90,7 @@ export function saveRoom(req, res) {
               if (person.role == Roles.Admin || person.role == Roles.Lmsadmin ||  person.role == Roles.Presenteradmin || person.role == Roles.CRMadmin) { //TODO - for SA also corporateId should be insert from backend.
                 obj['corporateId'] = bussinessID; 
                 //changeBy: pranathi, disc: In room cheking roomName is exists or not
-                Room.findOne({ corporateId: person.profile.companyid._id, roomName:req.body.roomdata.roomName })
+                Room.findOne({ corporateId: bussinessID, roomName:req.body.roomdata.roomName })
                 .exec(function(roomErr,roomData) {
                   if(roomErr) {
                     res.json( { status: false, error: roomErr.message });
@@ -1348,10 +1348,10 @@ export function removeRoomUser(req, res) {
                               message : "User removed successfully." 
                             });
                             //createdBy: pranathi, disc: push notifications for android devices
-                            let message = 'Your account has been removed from the Room '+docs.roomName+'.';
-                            if(user && user.deviceType == 'ANDROID') {
-                              sendPushNotificationAndroid("REMOVE-ROOM", message, user.deviceId, person._id, user._id);
-                            }
+                            // let message = 'Your account has been removed from the Room '+docs.roomName+'.';
+                            // if(user && user.deviceType == 'ANDROID') {
+                            //   sendPushNotificationAndroid("REMOVE-ROOM", message, user.deviceId, person._id, user._id);
+                            // }
                           }
                         });
                       }
@@ -1810,13 +1810,13 @@ export function listRoomTopic(req, res) {
           //Query for fetching complete topic data based on selector and skip items based on itemsPerPage on previous page
           let query = Topic.find(selector)
           .limit(Number(listroom.items))
-          .select('topicName description roomId topicEnable createdBy')
+          .select('topicName description roomId topicEnable createdBy topicIndex')
           .skip(Number(listroom.items) * (Number(listroom.page)-1))
           // .sort({
           //   createdAt: -1
           // })
           if (req.query.sort == 'undefined' || req.query.sort == undefined) {
-            query.sort({ modifiedAt: -1 });
+            query.sort({ topicIndex: -1 });
           } else {
             //console.log("sort === ", req.query.sort);
           query.sort(JSON.parse(req.query.sort));
@@ -3082,7 +3082,12 @@ export function updateAssignedQuestionnaire(req, res) {
 
                                       //createdBy: pranathi, disc: push notifications for android students
                                       if(doc && doc.topicEnable) {
-                                        let message = 'The Questionnaire '+doc.questionnaire[0].questionnaireId. questionnaireName+' has been updated to Topic '+ doc.topicName +' at ' +moment(startDate).format('DD-MM-YYYY hh:mm A')+ ' to ' +moment(closeDate).format('DD-MM-YYYY hh:mm A') + '.';
+                                        let message = 'The Questionnaire '+doc.questionnaire[0].questionnaireId. questionnaireName+' has been updated to Topic '+ doc.topicName +' at ' +moment(startDate).utc().format('DD-MM-YYYY hh:mm A')+ '(UTC) to ' +moment(closeDate).utc().format('DD-MM-YYYY hh:mm A') + '(UTC).';
+                                          if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                                            message = 'The Questionnaire '+doc.questionnaire[0].questionnaireId. questionnaireName+' has been updated to Topic '+ doc.topicName +' at ' +moment(startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A')+'('+serverConfig.mail_timezone.code +') to '+moment(closeDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +').';
+                                          }
+
+
                                         roomStudentData(topicDoc.roomId,function(err,studentIds) {
                                           if(studentIds != null) {
                                            Users.find({_id:{$in:studentIds}})
@@ -3106,6 +3111,11 @@ export function updateAssignedQuestionnaire(req, res) {
                                         createdBy: doc.createdBy,
                                         createdBody: 'The Questionnaire has been successfully updated under ' + '<b>' + doc.topicName + '</b>' + ' by ' + '<b>' + ' you ' + '</b>' + ' at ' + '<b>' + moment(doc.closeFrom).format('DD-MM-YYYY hh:mm A') + '</b>' + ' to ' + '<b>' + moment(doc.openFrom).format('DD-MM-YYYY hh:mm A') + '</b>' + '.',
                                       };
+
+                                      if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                                        schObj["body"] = 'The Questionnaire has been successfully updated under ' + '<b>' + doc.topicName + '</b>' + ' by ' + '<b>' + person.firstname + '</b>' + ' at ' + '<b>' + moment(doc.closeFrom).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') +'('+ serverConfig.mail_timezone.code +')</b>' + ' to ' + '<b>' + moment(doc.openFrom).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') +'('+ serverConfig.mail_timezone.code +')</b>' + '.';
+                                        schObj["createdBody"] = 'The Questionnaire has been successfully updated under ' + '<b>' + doc.topicName + '</b>' + ' by ' + '<b>' + ' you ' + '</b>' + ' at ' + '<b>' + moment(doc.closeFrom).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +')</b>' + ' to ' + '<b>' + moment(doc.openFrom).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +')</b>' + '.';
+                                      }
                                       sendScheduleEmail(schObj);
                                     }
                                   });
@@ -3771,7 +3781,7 @@ export function listResultTopic(req, res) {
             .select('roomId topicId questionnaireId submittedBy questionnairePercentage grade')
             .skip(Number(listresult.items) * (Number(listresult.page)-1))
             .sort({createdAt: -1})
-            .populate('questionnaireId submittedBy roomId',  'questionnaireName questions firstname lastname roomName ')
+            .populate('questionnaireId submittedBy roomId',  'questionnaireName questionnaireType questions firstname lastname roomName ')
                           
             .exec(function(err, result) {
               if (err) {
@@ -3827,7 +3837,7 @@ export function listResultTopic(req, res) {
                   .select('roomId topicId questionnaireId submittedBy grade questionnairePercentage')
                   .skip(Number(listresult.items) * (Number(listresult.page)-1))
                   .sort({createdAt: -1})
-                  .populate('questionnaireId submittedBy roomId',  'questionnaireName questions firstname lastname roomName ')
+                  .populate('questionnaireId submittedBy roomId',  'questionnaireName questionnaireType questions firstname lastname roomName ')
                                 
                   .exec(function(err, result) {
                     if (err) {
@@ -3836,7 +3846,7 @@ export function listResultTopic(req, res) {
                         error : err.message 
                       });
                     } else {
-
+                      
                       //Query for counting result data based on room, topic, questionnaire and submittedBy
                       Result.count({
                         roomId : listresult.roomId,
@@ -3873,7 +3883,7 @@ export function listResultTopic(req, res) {
                   .select('roomId topicId questionnaireId submittedBy grade questionnairePercentage')
                   .skip(Number(listresult.items) * (Number(listresult.page)-1))
                   .sort({createdAt: -1})
-                  .populate('questionnaireId submittedBy roomId',  'questionnaireName questions firstname lastname roomName ')
+                  .populate('questionnaireId submittedBy roomId',  'questionnaireName questionnaireType questions firstname lastname roomName ')
                                 
                   .exec(function(err, result) {
                     if (err) {
@@ -4457,8 +4467,8 @@ export function getQuestionnaireDataList(req, res){
         if (person.role == Roles.Admin || person.role == Roles.Lmsadmin || person.role == Roles.Presenteradmin || person.role == Roles.Instructor || person.role == Roles.Moderator) {
 
           //fetching questionnaire data based on coporate Id
-          var questionnaireQuery = Questionnaire.find({corporateId : bussinessID})
-          .select('_id questionnaireName questions');
+          var questionnaireQuery = Questionnaire.find({corporateId : bussinessID, questionnaireType : {$ne : 'scorm'}})
+          .select('_id questionnaireName questions questionnaireType');
           questionnaireQuery.exec(function(err, questionnaireDoc) {
             if(err) {
               res.json({
@@ -4475,8 +4485,8 @@ export function getQuestionnaireDataList(req, res){
         } else if(person.role == Roles.Superadmin){
 
           //fetching questionnaire data 
-          var questionnaireQuery = Questionnaire.find()
-          .select('_id questionnaireName');
+          var questionnaireQuery = Questionnaire.find({questionnaireType : {$ne : 'scorm'}})
+          .select('_id questionnaireName questions questionnaireType');
           questionnaireQuery.exec(function(err, questionnaireDoc){
             if(err) {
               res.json({
@@ -7674,20 +7684,15 @@ export function saveAssignmentGradeConfiguration(req, res) {
 export function listRoomCertificateData(req, res) {
   checkValidRequest(req.headers, function(person){
 
-  try {
-    //Verifying if request is valid or not
+    try {
+      //Verifying if request is valid or not
     if (person == null || !req.query.items || !req.query.page || !req.query.roomId) {
       res.json({
       status: false, 
       error : "Invalid request."
       });
     } else {
-
-    let totalTopicsCountQuery = Topic.count({roomId: req.query.roomId, topicEnable : true}); // Get total topics count for the course.
-    
-    let questionnaireCountQuery = Topic.find({roomId: req.query.roomId, topicEnable : true}).select('questionnaire'); // Get all questionnaires for the course
-
-    let selector = {};
+      let selector = {};
   
     if(/*person.role === Roles.Admin ||*/ person.role === Roles.Lmsadmin /*|| person.role == Roles.Presenteradmin || person.role == Roles.CRMadmin*/) {
       selector = {roomId: mongoose.Types.ObjectId(req.query.roomId)};
@@ -7695,213 +7700,275 @@ export function listRoomCertificateData(req, res) {
     {
       selector = {roomId: mongoose.Types.ObjectId(req.query.roomId), instId: mongoose.Types.ObjectId(person.id)};
     }
- 
-    let skipValue = Number(req.query.items) * (Number(req.query.page) -1);
-    let limitValue = Number(req.query.items);
-    let sortValue = JSON.parse(req.query.sort);
-    let searchValue = req.query.search;
 
-    let studentsQuery = Student.aggregate([
-      {$match: selector}, 
-      {$project: {students: '$students'}}, // Get list of students in the course
-      {$unwind: '$students'}, // Unwind Students array
-      {$lookup: { // Get student name from User table
-        from: 'users',
-        localField: 'students',
-        foreignField: '_id',
-        as: 'student'
-      }},
-      {$project: {_id: 0, 'student._id': 1, 'student.firstname': 1, 'student.lastname': 1, 'student.guest' : 1}}, // Remove unnecessary fields
-      {$unwind: '$student'}, // Unwind students array
-      {$sort: sortValue}, 
-      {$skip: skipValue},
-      {$limit: limitValue}
-  ]);
-
-
-  if(searchValue && searchValue.trim() !== '' && searchValue !== undefined) {
-
-    let slash_search = addSlash(searchValue);
-    let searchKey = RegExp(slash_search,'i');
-
-    studentsQuery = Student.aggregate([
-      {$match: selector}, 
-      {$project: {students: '$students'}}, // Get list of students in the course
-      {$unwind: '$students'}, // Unwind Students array
-      {$lookup: { // Get student name from User table
-        from: 'users',
-        localField: 'students',
-        foreignField: '_id',
-        as: 'student'
-      }},
-      {$project: {_id: 0, 'student._id': 1, 'student.firstname': 1, 'student.lastname': 1, 'student.guest' : 1}}, // Remove unnecessary fields
-      {$unwind: '$student'}, // Unwind students array
-      {$match: {$or: [{'student.firstname': {$regex: searchKey}},{'student.lastname': {$regex: searchKey}}]}},
-      {$sort: sortValue}, 
-      {$skip: skipValue},
-      {$limit: limitValue}
-    ]);
-  }
-
-  let studentsEligibleQuery = Student.find(selector)
-                              .select('certificateEligible');
+    function execStudentsQuery(cb) {
+      let skipValue = Number(req.query.items) * (Number(req.query.page) -1);
+      let limitValue = Number(req.query.items);
+      let sortValue = JSON.parse(req.query.sort);
+      let searchValue = req.query.search;
+      let slash_search = addSlash(searchValue);
+      let searchKey = RegExp(slash_search,'i');
   
-  let resultData = [];
+      let studentsQuery = Student.find(selector).select('students').populate('students', 'firstname lastname guest');
+  
+      studentsQuery.exec(function(err, studentsData){
+        if(err) return cb(err);    
+      
+        let studentsList = studentsData[0] && studentsData[0].students ? studentsData[0].students : [];
+  
+        studentsList = studentsList.filter((student) => { //Remove guest students
+          return !(student.guest);
+        });
+  
+        if(searchValue && searchValue.trim() !== '' && searchValue !== undefined) { //Search functionality
+          studentsList = studentsList.filter((student) => {
+            return searchKey.test(student.firstname);
+          });
+        }
+  
+        if(sortValue.firstname === -1){ //Sort by firstname
+          studentsList.sort((a,b) => {
+            return a.firstname < b.firstname ? 1 : -1;
+          });
+        } else {
+          studentsList.sort((a,b) => {
+            return a.firstname > b.firstname ? 1 : -1;
+          });
+        }
+  
+        studentsList = studentsList.slice(skipValue, skipValue + limitValue); //Pagination  
+  
+        return cb(null, studentsList);
+      });
+    };
 
-  studentsEligibleQuery.exec(function(err, eligibleStudents){
-    if(err) throw err;
+    function execTotalStudentsCountQuery(cb) {
+      let totalStudentsCountQuery = Student.find(selector).select('students').populate('students', 'firstname lastname guest')
+    
+        totalStudentsCountQuery.exec(function(err, totalStudentsCount){
+          if(err) return cb(err);
+    
+          let studentsList = totalStudentsCount[0] && totalStudentsCount[0].students ? totalStudentsCount[0].students : [];
+    
+          studentsList = studentsList.filter((student) => {
+            return !(student.guest);
+          });
+    
+          if(studentsList.length > 0){
+            cb(null, studentsList.length);
+          } else {
+            res.json({
+              status: true,
+              count: 0,
+              certificateData: []
+            });
+          }
+        });
+    }
+
+  function execStudentsEligibleQuery(cb) {
+    let studentsEligibleQuery = Student.find(selector).select('certificateEligible');
+
+    studentsEligibleQuery.exec(function(err, eligibleStudents){
+      if(err) return cb(err);
+    
+      let eligibleStudentsList = [];
+
+      eligibleStudents.forEach(function(data){
+        eligibleStudentsList = _.unionBy(data.certificateEligible, eligibleStudentsList);
+      });
+      
+      eligibleStudentsList = eligibleStudentsList.map(function(item) { return "'" + item + "'" }).join(',');
+
+      return cb(null, eligibleStudentsList);
+    });
+  };
+
+  function execTotalTopicsCountQuery(cb) {
+    let totalTopicsCountQuery = Topic.count({roomId: req.query.roomId, topicEnable : true}); // Get total topics count for the course.
 
     totalTopicsCountQuery.exec(function(err, totalTopicsCount){
-      if(err) throw err;
-  
-      questionnaireCountQuery.exec(function(err, totalQuestionnaireCount){
-        if(err) throw err;
-  
-        studentsQuery.exec(function(err, studentsData){
-          if(err) throw err;    
-          
-          let studentsList = [];
-          let eligibleStudentsList = [];
-          studentsData.forEach(function(data){
-            if(data.student.guest == false) {
-              studentsList.push(data.student)
-            }
-          });
+      if(err) cb(err);
 
-          eligibleStudents.forEach(function(data){
-            eligibleStudentsList = _.unionBy(data.certificateEligible, eligibleStudentsList);
-          });
-          
-          eligibleStudentsList = eligibleStudentsList.map(function(item) { return "'" + item + "'" }).join(',');
-          
-          async.eachSeries(studentsList, function(student, cb){ //loop through each student and get details - async.eachSeries is a sync version of Array.map
-            let row = {}; 
-            let acc = 0;
-            let topicId = [];
-            let topicIdForQuestionnaireResults = [];
-            totalQuestionnaireCount.map((topicData) => {
-              topicIdForQuestionnaireResults.push(topicData._id);
-              topicId.push(String(topicData._id));  
-              return acc += Number(topicData.questionnaire.length);
-            });
-            row.totalQuestionnaire = acc;
-            let userTopicsCountQuery = DataLog.find({               
-              action : 'Topic_Status',
-              uid : student._id,
-              'value.roomId' : req.query.roomId,
-              'value.status' : 2,
-              'value.topicId' : {
-                $in : topicId
-              }
-            });  
-            
-            //let userTopicsCountQuery = DataLog.find({}).select('value.topicId');
-            userTopicsCountQuery.exec(function(err, userTopicsCount){
-              if(err) throw err;
-              
-              GradeConfiguration.findOne({
-                companyid : person.profile.companyid._id
-              })
-              .exec(function(err, gradeResult) {
-                if(err) {
-                  res.json({
-                    status : false,
-                    error : err.message
-                  })
-                } else {
-                  let grades = [{
-                    from : 70,
-                    to : 100,
-                    result : 'DISTINCTION',
-                    grade : 'A'
-                  },
-                  {
-                    from : 35,
-                    to : 69,
-                    result : 'PASS',
-                    grade : 'B'
-                  },
-                  {
-                    from : 0,
-                    to : 34,
-                    result : 'FAIL',
-                    grade : 'C'
-                  }];
-                  if(gradeResult != null ) {
-                    grades = gradeResult.grades
-                  } 
-                  
-                  
-                  row._id = student._id;       
-                  row.name = student.firstname + ' ' + student.lastname;
-                  row.topicsCompletedPercentage = (totalTopicsCount !== 0) ? Math.round((userTopicsCount.length/totalTopicsCount)*100): 0;
-                  
-                  let matchSelectorForQuestionnaire = { 
-                    roomId: mongoose.Types.ObjectId(req.query.roomId), 
-                    submittedBy: mongoose.Types.ObjectId(student._id),
-                    topicId: {
-                      $in : topicIdForQuestionnaireResults
-                    }
-                  }
-                  let questionnaireQuery = Result.aggregate([ 
-                    { $match: matchSelectorForQuestionnaire },
-                    { $group : { 
-                             _id : 0, 
-                              percentage: {$push: "$questionnairePercentage"}
-                              }},
-                  ]);
-                  questionnaireQuery.exec(function(err, questionnaireList){
-                    if(err) throw err;
-                        
-                    let questionnaireGrade = '';  
-                     //Math.round( *100)/100 is to truncate to 0 or 2 decimal positions.
-                    row.questionnaireCount = (questionnaireList[0] && questionnaireList[0].percentage) ? questionnaireList[0].percentage.length : 0;
-                    let avergaPercentage = 0;
-                    if(row.questionnaireCount !== 0) { 
-                      questionnaireList[0].percentage.map((val) => {
-                        avergaPercentage += Number(val)
-                      })
-                    } else {
-                      avergaPercentage = 0
-                    }
-                    row.questionnairePercentage = questionnaireList.length>0? Math.round(avergaPercentage/questionnaireList[0].percentage.length): 0;
-                    
-                    
-                    row.isCertificateEligible = _.includes(eligibleStudentsList, student._id);
-                    grades.map(function(configuredGradeData) {
-                      if(row.questionnairePercentage >= configuredGradeData.from && row.questionnairePercentage <= configuredGradeData.to) {
-                        row.questionnaireGrade = configuredGradeData.grade
-                      }
-                    });
-                    resultData.push(row);
-              
-                    if(studentsList.length === resultData.length) {
-                      res.json({
-                      status: true,
-                      count: studentsList.length,
-                      certificateData: resultData
-                      });                
-                    }
-                    cb(null);
-                  });
-                }
-              })
-            });                         
-          });
-        });
+      return cb(null, totalTopicsCount);
+    });
+  };
+
+  function execQuestionnaireCountQuery(cb) {
+
+    let questionnaireCountQuery = Topic.find({roomId: req.query.roomId, topicEnable : true}).select('questionnaire'); // Get all questionnaires for the course
+
+    questionnaireCountQuery.exec(function(err, count){
+      if(err) return cb(err);
+    
+      let totalQuestionnaireCount = 0;
+      let topicIds = [];
+      let topicIdsForQuestionnaireResults = [];
+      count.map((topicData) => {
+        topicIds.push(String(topicData._id));  
+        topicIdsForQuestionnaireResults.push(topicData._id);
+        totalQuestionnaireCount += Number(topicData.questionnaire.length);
       });
+
+      return cb(null, {totalQuestionnaireCount, topicIds, topicIdsForQuestionnaireResults});
+    });
+  };
+
+  function execGradeCalcQuery(cb) {
+    let gradeCalcQuery = GradeConfiguration.findOne({companyid : person.profile.companyid._id});
+
+    let grades = [];
+    gradeCalcQuery.exec(function(err, gradeResult) {
+      if(err) { 
+        return cb(err);
+      } else {
+        grades = [{
+          from : 70,
+          to : 100,
+          result : 'DISTINCTION',
+          grade : 'A'
+        },
+        {
+          from : 35,
+          to : 69,
+          result : 'PASS',
+          grade : 'B'
+        },
+        {
+          from : 0,
+          to : 34,
+          result : 'FAIL',
+          grade : 'C'
+        }];
+      }
+        if(gradeResult != null ) {
+          grades = gradeResult.grades
+        } 
+
+        cb(null, grades);
+    });
+  };
+
+  function execUserTopicsCountQuery(student, topicId, cb){
+    let userTopicsCountQuery = DataLog.count({               
+      action : 'Topic_Status',
+      uid : student._id,
+      'value.roomId' : req.query.roomId,
+      'value.status' : 2,
+      'value.topicId' : {
+        $in : topicId
+      }
+    }); 
+
+    userTopicsCountQuery.exec(function(err, userTopicsCount){
+      if(err) return cb(err);
+
+      cb(null, userTopicsCount);
+    });
+  };
+
+  function execQuestionnaireQuery(student, topicIdForQuestionnaireResults, cb) {
+
+    let matchSelectorForQuestionnaire = { 
+      roomId: mongoose.Types.ObjectId(req.query.roomId), 
+      submittedBy: mongoose.Types.ObjectId(student._id),
+      topicId: {
+        $in : topicIdForQuestionnaireResults
+      }
+    }
+
+    let questionnaireQuery = Result.aggregate([ 
+      { $match: matchSelectorForQuestionnaire },
+      { $group : { 
+               _id : 0, 
+                percentage: {$push: "$questionnairePercentage"}
+                }},
+    ]);
+
+    questionnaireQuery.exec(function(err, questionnaireList){
+      if(err) return cb(err);
+
+      cb(null, questionnaireList);
+    });
+  };
+  
+
+  async.parallel({
+    studentsList: execStudentsQuery,
+    totalStudentsCount: execTotalStudentsCountQuery,
+    eligibleStudentsList: execStudentsEligibleQuery,
+    totalTopicsCount: execTotalTopicsCountQuery,
+    questionnaireCount: execQuestionnaireCountQuery,
+    grades: execGradeCalcQuery
+  },
+    (err, outerResults) => {
+    if(err) throw err;
+
+    let studentsList = outerResults.studentsList;
+    let totalStudentsCount = outerResults.totalStudentsCount;
+    let eligibleStudentsList = outerResults.eligibleStudentsList;
+    let totalTopicsCount = outerResults.totalTopicsCount;
+    let questionnaireCount = outerResults.questionnaireCount;
+    let grades = outerResults.grades;
+
+    let resultData = [];
+    
+    async.eachSeries(studentsList, (student, next) => {
+      let row = {};
+
+      async.parallel({
+        userTopicsCount: execUserTopicsCountQuery.bind(null, student, questionnaireCount.topicIds),
+        questionnaireList: execQuestionnaireQuery.bind(null, student, questionnaireCount.topicIdsForQuestionnaireResults)
+      },
+      (err, innerResults) => {
+        if(err) throw err;
+
+        let userTopicsCount = innerResults.userTopicsCount;
+        let questionnaireList = innerResults.questionnaireList;
+
+        row._id = student._id;
+        row.name = student.firstname + ' ' + student.lastname;
+        row.totalQuestionnaire = questionnaireCount.totalQuestionnaireCount;
+        row.topicsCompletedPercentage = (totalTopicsCount !== 0) ? Math.round((userTopicsCount/totalTopicsCount)*100): 0;
+        row.questionnaireCount = (questionnaireList[0] && questionnaireList[0].percentage) ? questionnaireList[0].percentage.length : 0;
+        
+        let avergaPercentage = 0;
+        if(row.questionnaireCount !== 0) { 
+          questionnaireList[0].percentage.map((val) => {
+          avergaPercentage += Number(val)
+        });
+        } else {
+          avergaPercentage = 0
+        }
+        row.questionnairePercentage = questionnaireList.length>0? Math.round(avergaPercentage/questionnaireList[0].percentage.length): 0;
+
+        row.isCertificateEligible = _.includes(eligibleStudentsList, student._id);
+        grades.map((configuredGradeData) => {
+          if(row.questionnairePercentage >= configuredGradeData.from && row.questionnairePercentage <= configuredGradeData.to) {
+            row.questionnaireGrade = configuredGradeData.grade
+          }
+        });
+        resultData.push(row);
+        next();
+      });
+    },() => {
+        res.json({
+        status: true,
+        count: totalStudentsCount,
+        certificateData: resultData
+        });                
     });
   });
-} 
-}catch(e){
+}
+  } catch(e){
       console.log("error in list room certificate data", e)
       res.json({
-        status : false, 
-        error : "Internal server error."
+      status : false, 
+      error : "Internal server error."
       });
     }
   });
-} 
+}
 
 
 /**
@@ -7956,3 +8023,46 @@ export function toggleCertificateDownload(req, res) {
     }
   });
 }
+
+/**
+*  @Function name : setIndexTopics
+*  @Purpose : adding index to room topics.
+*  @Request Object : index, topicName, topicId
+*  @Response Object : Success - success message, Failure - Error message
+*  @Author : Pranathi Gaddam
+*/
+
+export function setIndexTopics(req, res) {
+    checkValidRequest(req.headers, function(person) {
+      try {
+        let topicData = req.body.topicData;
+        var errors=[];
+        Topic.update({topicEnable : false, topicIndex:{$exists: true}},{ $unset : {topicIndex :""}},{"multi": true})
+          .exec(function(fetchErr, doc) {
+          });
+        for(let i in topicData) {
+          Topic.update({ _id : topicData[i]._id }, { $set : { topicIndex : topicData[i].index } },{"multi": true},function(err, res) {
+            if(err) {
+              errors.push(err)
+            }
+          }); 
+        }
+        if(errors.length <= 0){
+          res.json({
+                status: true,
+                message: "Updated successfully"
+              });
+        } else { 
+          res.json({
+            status: false,
+            message: "Error in updating  index to topics"
+          });
+        }
+      } catch(e) {
+        console.log("error in set Index to Topics", e);
+        res.json({ status : false, message : "Internal server error." });
+      }
+    });
+}
+
+

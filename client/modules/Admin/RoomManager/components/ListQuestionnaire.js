@@ -120,7 +120,6 @@ export class ListQuestionnaire extends Component {
     if(this.props.topicData && this.props.topicData.questionnaire && this.props.topicData.questionnaire.length > 0){
       let questionnaire = this.props.topicData.questionnaire;
       listQuestionnaires = questionnaire.map((questionnaire) => {
-        
         return <li key={questionnaire._id}>
           <div className="clearfix" >
             <h4 className="pull-left">

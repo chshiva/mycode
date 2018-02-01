@@ -38,7 +38,6 @@ class QuestionnairePopup extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // console.log("next", nextProps)
     if(nextProps.showModal == "true") {
       this.setState({
         showModal: true
@@ -77,11 +76,15 @@ class QuestionnairePopup extends Component {
           }
         }
       }
-    } 
+    } else {
+      this.setState({        
+        timeLimit : false                
+      });
+    }
   }
 
   hideAssignQuestionnaireModal() {
-    //console.log('coming');
+    
     this.setState({
       uid: null,
       showModal: false,
@@ -108,10 +111,12 @@ class QuestionnairePopup extends Component {
     const index = ReactDOM.findDOMNode(this.refs.questionnaire).value;
     let questionnaireId = null;
     let questionnaireQuestionCount = null;
+    let questionnaireType = null;
     if(this.props.editModal == undefined || this.props.editModal == true){    
       const questionnaireData = index != ''?this.props.questionnaireData[index]:null;
       questionnaireQuestionCount = questionnaireData != null?questionnaireData.questions.length:null;
       questionnaireId = questionnaireData != null?questionnaireData._id:'';
+      questionnaireType = questionnaireData != null? questionnaireData.questionnaireType:null;
     } else {
       questionnaireId = index;  
     } 
@@ -132,7 +137,7 @@ class QuestionnairePopup extends Component {
           this.refs.questionnaire_container.error("Start and end time cannot be same");
         } else if (+ipstime > +ipetime) {
           this.refs.questionnaire_container.error("End time should be greater than Start time");
-        } else if ((this.props.editModal == undefined && questionnaireQuestionCount <= 0) || (this.props.editModal == true && questionnaireQuestionCount <= 0)) {
+        } else if ((this.props.editModal == undefined && questionnaireQuestionCount <= 0 && questionnaireType !== 'scorm') || (this.props.editModal == true && questionnaireQuestionCount <= 0 && questionnaireType !== 'scorm')) {
           this.refs.questionnaire_container.error("Please assign a questionnaire which has atleast one question in it");
         } else {
           var questionnaire = {
@@ -147,7 +152,7 @@ class QuestionnairePopup extends Component {
           this.props.dispatch(AssignQuestionnaireRequest({questionnaire})).then(res => this.setresponse(res,questionnaire.topicId, questionnaire.questionnaireId));
         }        
       } else {
-        if ((this.props.editModal == undefined && questionnaireQuestionCount <= 0) || (this.props.editModal == true && questionnaireQuestionCount <= 0)) {
+        if ((this.props.editModal == undefined && questionnaireQuestionCount <= 0 && questionnaireType !== 'scorm') || (this.props.editModal == true && questionnaireQuestionCount <= 0 && questionnaireType !== 'scorm')) {
           this.refs.questionnaire_container.error("Please assign a questionnaire which has atleast one question in it");
         } else {
           var questionnaire = {

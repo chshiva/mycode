@@ -50,8 +50,12 @@ const uploadSchema = new Schema({
     type: Date,
     required: true,
     default: moment().utc().toDate(),
-  }
-  
+  },
+  scormApiVersion: {
+    type: String,
+    required: false,
+    default: '',
+  },
 },{
     toObject : {getters: true},
     toJSON : {getters: true}

@@ -32,6 +32,7 @@ export class QuestionnaireView extends Component {
     if(this.props.questionnaireData){
       this.questionnaireName = this.props.questionnaireData.questionnaireName;
       this.description = this.props.questionnaireData.description;
+      this.questionnaireType = this.props.questionnaireData.questionnaireType;
     }
     let cls_inlineEditGroup = `${styles.inlineEditGroup} clearfix`;
     let loadType = 'list';    
@@ -71,6 +72,13 @@ export class QuestionnaireView extends Component {
                       <label htmlFor="Description"><FormattedMessage id='description' />:</label>
                       <div className={styles.inlineEdit}>{this.description ? this.description : "-"}</div>
                     </div>
+                    {
+                      this.questionnaireType === 'scorm' ?
+                        <div className={cls_inlineEditGroup}>
+                          <label htmlFor="Description"><FormattedMessage id="questionnaire_type" />:</label>
+                          <div className={styles.inlineEdit}><FormattedMessage id="scorm" /></div>
+                        </div> : null
+                    }
                   </div>
                   <hr className={styles.mobHr} />
                 </div>

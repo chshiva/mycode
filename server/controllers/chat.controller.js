@@ -846,7 +846,7 @@ export function exportRoomChat (req,res) {
 					if (roomErr) {
 						res.json({ status : false, error : roomErr.message });
 					}	else if(roomRes && roomRes._id) {
-						let query = Chat.find({ sentToRoom : roomRes._id },{'sentBy.firstname':1,messageType:1,message:1,createdOn:1});
+						let query = Chat.find({ sentToRoom : roomRes._id },{sentBy:1,messageType:1,message:1,createdOn:1});
 						query.populate('sentBy', 'firstname lastname email profile.profileImage')
 							.sort({ createdOn : 1 })
 							.exec(function (e, doc1) {
@@ -858,12 +858,16 @@ export function exportRoomChat (req,res) {
 											if(item.messageType ==='FILE') item.message = '<attachment>'
 											let localTime = moment(item.createdOn, "x").tz(serverConfig.mail_timezone.zone).format("YYYY-MM-DD hh:mm A");
 											//console.log("createdOn", localTime);
-											let obj={
-												message : item.message,
-												sentBy :item.sentBy.firstname +' '+ item.sentBy.lastname,
-												createdOn : localTime + ' (' + serverConfig.mail_timezone.code +') '
-											}
-											inputArray.push(obj);	
+											let sentBy = item && item.sentBy && item.sentBy.firstname ? item.sentBy.firstname : '';
+											if (sentBy != '') {
+												sentBy += ' ' + (item && item.sentBy && item.sentBy.lastname ? item.sentBy.lastname : '');
+												let obj={
+													message : item.message,
+													sentBy : sentBy,
+													createdOn : localTime + ' (' + serverConfig.mail_timezone.code +') '
+												}
+												inputArray.push(obj);	
+											}	
 										})
 										exportUsersData(inputArray, function(error,filename) {
 											if (filename != null) {

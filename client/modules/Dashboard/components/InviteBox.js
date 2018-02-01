@@ -25,13 +25,14 @@ export class InviteBox extends Component {
       mailsList : [],
       value : '',
       error : '',
+      disableInviteBtn: false
     }
     this.guestUrl = 'No link';
   }
 
   handleChange = (e) => {
     if (e.target.value != ',' && e.target.value != ' ') {
-      this.setState({ value : e.target.value });
+      this.setState({ value : e.target.value});
     }
   }
 
@@ -53,34 +54,38 @@ export class InviteBox extends Component {
   }
 
   invitePeople(){
-    let mail = this.state.value.trim();
-    let mails = this.state.mailsList;
-    if(mail != ''){
-      if(!validator.isEmail(mail)){
-        this.setState({ error : <FormattedMessage id='invalid_mail_id' />});
-      }else{
-        mails.push(mail.toLowerCase());
-      }
-    }
-    if(mails.length > 0){
-
-      let obj = {
-        mails : mails,
-        link : this.guestUrl,
-        scheduleId : this.props.scheduleId,
-        slotId : this.props.slotId,
-        // roomId : this.props.roomId
-      };
-      sendInviteLink(obj).then(res => {
-        if(res.status){
-          this.props.hidecallback();
-          //changeBy: pranathi, disc: onclick of sharelink button, changed  error  state to  empty 
-          this.setState({ mailsList : [], value : '', error : ''  });
+    if (this.state.disableInviteBtn == false) {
+      
+      let mail = this.state.value.trim();
+      let mails = this.state.mailsList;
+      if(mail != ''){
+        if(!validator.isEmail(mail)){
+          this.setState({ error : <FormattedMessage id='invalid_mail_id' />});
+        }else{
+          mails.push(mail.toLowerCase());
         }
-        this.props.errorCallback(res);
-      });
-    }else{
-      this.setState({ error : <FormattedMessage id='please_enter' />});
+      }
+      if(mails.length > 0){
+
+        let obj = {
+          mails : mails,
+          link : this.guestUrl,
+          scheduleId : this.props.scheduleId,
+          slotId : this.props.slotId,
+          // roomId : this.props.roomId
+        };
+        this.setState({ mailsList : [], value : '', disableInviteBtn : true });
+        sendInviteLink(obj).then(res => {
+          if(res.status){
+            this.props.hidecallback();
+            //changeBy: pranathi, disc: onclick of sharelink button, changed  error  state to  empty 
+            this.setState({ error : '', disableInviteBtn: false});
+          }
+          this.props.errorCallback(res);
+        });
+      }else{
+        this.setState({ error : <FormattedMessage id='please_enter' />});
+      }
     }
   }
 
@@ -139,7 +144,7 @@ export class InviteBox extends Component {
 
   //Chnages made by prateek for handling bug#2999
   hideModal = () => {
-    this.setState({error : '', mailsList : [], value : ''});
+    this.setState({error : '', mailsList : [], value : '', disableInviteBtn: false });
     this.props.hidecallback();    
   }
 
@@ -255,7 +260,7 @@ export class InviteBox extends Component {
           <Footer className={adminStyles.mainSaveAssign} >
             <div className={adminStyles.blockSaveAssign} >
               <button id="cancel" onClick={this.hideModal} ><FormattedMessage id='cancel' /></button>
-              <button id="inviteSubmitBtn" className={cls_btnSaveEdit} onClick={this.invitePeople.bind(this)}><FormattedMessage id='invite' /></button>
+              <button id="inviteSubmitBtn" className={cls_btnSaveEdit} onClick={this.invitePeople.bind(this)} disabled={this.state.disableInviteBtn}><FormattedMessage id='invite' /></button>
             </div>
           </Footer>
         </Modal>

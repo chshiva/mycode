@@ -301,6 +301,7 @@ export function updatePackage(req, res) {
   // Varifying request is valid or not
   checkValidRequest(req.headers, function(person){
     try{
+      // console.log('req.body.packagedata',req.body.packagedata);
       if (person != null && req.body.packagedata && req.params.id) {
         
         // only superadmin can update the package no one else
@@ -315,7 +316,6 @@ export function updatePackage(req, res) {
           // cheack packageid is valid or not. 
           Package.findOne({ _id : recordId }, function(error, data){
             if (data) {
-
               // check any validation changes(user count and room count)
               checkUpdateValidations(data, obj, function(response){
                 if(response != null) res.json({ status : false, error : response });
@@ -498,19 +498,55 @@ export function checkUpdateValidations (existData, newData, cb) {
 
     // check new usercount value is less than existed usercount then check the users count
     if ((existData.userCount > newData.userCount && newData.userCount != -1) || (!existData.userCount)) {
-      let adminquery = Users.findOne({ _id : existData.assignedTo }).select('profile.companyid');
-      adminquery.exec( function(error, admin){
-        if (admin) {
-          Users.count({ "profile.companyid" : admin.profile.companyid, userStatus : "Active" }).exec(function(err, count){
-            if (err) cb("Internal server error, Please try again");
-            else if (count <= newData.userCount) cb(null);
-            else {
-              let message = "User count exceded, Already you have " + count + " users.";
-              cb(message);
-            }
-          });
-        } else  cb("Invalid package");
-      });
+      Package.find({ _id: { $ne: existData._id }, assignedTo: existData.assignedTo })
+        .exec(function(limitErr,result){
+          if(result && result.length > 0){
+              let c = 0;
+              for(let i = 0; i < result.length; i++){
+                if(result[i].userCount == -1 || c == -1){
+                  c = -1;
+                  break;
+                }else{
+                  c += result[i].userCount;
+                }
+              }
+              if (c != -1 && newData.userCount != -1) {
+                let c1 = c + Number(newData.userCount);
+                let adminquery = Users.findOne({ _id : existData.assignedTo }).select('profile.companyid');
+                adminquery.exec( function(error, admin){
+                  if (admin) {
+                    Users.count({ "profile.companyid" : admin.profile.companyid, userStatus : "Active" }).exec(function(err, count){
+                      if (err) cb("Internal server error, Please try again");
+                      else if (count <= c1) cb(null);
+                      else {
+                        let message = "User count exceeded, Already you have " + count + " users.";
+                        cb(message);
+                      }
+                    });
+                  } else  cb("Invalid package");
+                });
+
+              } else {
+                cb(null);
+              }
+          } else if (result && result.length == 0) {
+              let adminquery = Users.findOne({ _id : existData.assignedTo }).select('profile.companyid');
+              adminquery.exec( function(error, admin){
+                if (admin) {
+                  Users.count({ "profile.companyid" : admin.profile.companyid, userStatus : "Active" }).exec(function(err, count){
+                    if (err) cb("Internal server error, Please try again");
+                    else if (count <= newData.userCount) cb(null);
+                    else {
+                      let message = "User count exceeded, Already you have " + count + " users.";
+                      cb(message);
+                    }
+                  });
+                } else  cb("Invalid package");
+              });
+          } else {
+            cb(null);
+          }
+        });
     } else if ((existData.roomCount > newData.roomCount && newData.roomCount != -1) || (!existData.roomCount)) {
       
       // check new roomCount value is less than existed roomCount then check the rooms count
@@ -518,7 +554,7 @@ export function checkUpdateValidations (existData, newData, cb) {
         if (err) cb("Internal server error, Please try again");
         else if (count <= newData.roomCount) cb(null);
         else {
-          let message = "Room count exceded, Already you have " + count + " rooms.";
+          let message = "Room count exceeded, Already you have " + count + " rooms.";
           cb(message);
         }
       });

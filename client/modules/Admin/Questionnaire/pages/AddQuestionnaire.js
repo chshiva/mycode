@@ -3,6 +3,7 @@ import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import { browserHistory } from 'react-router';
+import axios from 'axios';
 
 import AuthClient from '../../../../components/AuthController';
 import DataObject from '../../../../components/DataObject';
@@ -27,6 +28,7 @@ import componentStyles from '../../../../components/component.css';
 import TopMenu from '../../../../components/TopMenu';
 import SubMenu from '../../../../components/SubMenu';
 import Label from '../../../../components/Label';
+import Loading from '../../../App/components/Loading';
 
 
 var dataObject = {};
@@ -39,8 +41,10 @@ class AddQuestionnaire extends Component {
       description: '',
       validationError: {},
       isChecked: false,
-      qId: ''
-
+      qId: '',
+      isUploadScormChecked: false,
+      file: null,
+      uploading: false,
     }
     this.form = {};
     this.res = {};
@@ -86,7 +90,54 @@ class AddQuestionnaire extends Component {
     }
 
     this.setState({
-      isChecked : e.target.checked
+      isChecked : e.target.checked,
+      isUploadScormChecked: false,
+    });
+  }
+
+  setFile(e) {
+    this.setState({ file: e.target.files[0] });
+  }
+
+  handleUploadToggleChange(e) {
+    this.setState({
+      isUploadScormChecked: e.target.checked,
+      isChecked: false,
+    });
+  }
+
+  handleUpload() {
+    const file = this.state.file;
+    if (!file) {
+      return;
+    } else if (file.size > 155000000) {
+      alertify.alert(this.props.intl.messages.warning,this.props.intl.messages.topic_media_file_alert, 
+        function() {
+        }
+      ).setting({'label': this.props.intl.messages.ok});
+      return;
+    }
+
+    const data = new FormData();
+    data.append('file', file);
+    data.append('name', this.state.questionnaireName);
+    data.append('description', this.state.description);
+    this.setState({ uploading: true });
+    const url = `/api/questionnaire-scorm-upload/${AuthClient.getSession()}`;
+
+    let self = this;
+    axios.post(url, data).then((response) => {
+      if (response && response.status) {
+        self.setState({ uploading: false });
+        this.setresponse(response.data);
+      }
+      else if (response && !response.status) {
+        self.setState({ uploading: false });
+        self.refs.room_container.error(response.error);
+      } else {
+        self.setState({ uploading: false });
+        self.refs.room_container.error("Internal server error, Please try again");
+      }
     });
   }
 
@@ -110,11 +161,17 @@ class AddQuestionnaire extends Component {
        errors['selectQidError'] = <FormattedMessage id='select_questionnaire' />;
     }
 
+    if (this.state.file === null && this.state.isUploadScormChecked === true) {
+      errors['selectFileError'] = ' ';
+    }
+
     if (!(_.isEmpty(errors))) {
        this.setState({
          validationError: errors
        });
-     } else {
+    } else if (this.state.file && this.state.isUploadScormChecked === true) {
+      this.handleUpload();
+    } else {
         this.setState({
            validationError: {}
          });
@@ -165,6 +222,7 @@ class AddQuestionnaire extends Component {
     if(this.props.questionnaireData && this.props.questionnaireData.data){
         dataObject = this.props.questionnaireData.data;
     }
+    if (!this.state.uploading) {
     return (
       <div className={cls_container}>
         <ToastContainer
@@ -197,7 +255,8 @@ class AddQuestionnaire extends Component {
                           <formfield>
                             <Label data={{text: <FormattedMessage id ="questionnaire_name"/> }} required={true} />
                               <input id="questionnaire_name" ref="questionnari_name" type="text" className={this.state.validationError && this.state.validationError.nameError ? cls_error_element : cls_element} 
-                              placeholder="Questionnaire Name" 
+                              placeholder="Questionnaire Name"
+                              value={this.state.questionnaireName} 
                               onChange={this.handleName.bind(this)}
                               onKeyDown={this.handleKeyPress.bind(this)}
                               maxLength = {100}/>
@@ -245,11 +304,28 @@ class AddQuestionnaire extends Component {
                             <Label data={{text: <FormattedMessage id ="description"/> }} required={true} />
                             <textarea id="Description" ref="description" className={this.state.validationError && this.state.validationError.descriptionError ? cls_error_element : cls_element}
                               placeholder="Description"
+                              value={this.state.description}
                               onChange={this.handleDescription.bind(this)} 
                                maxLength = {150}/>
                             <label id="DescriptionError" className={errcls} >{this.state.validationError && this.state.validationError.descriptionError ? this.state.validationError.descriptionError : ''}</label>  
                           </formfield>
                         </div>
+                        <div className={cls}>
+                          <formfield>
+                            <input type="checkbox" 
+                             onChange={this.handleUploadToggleChange.bind(this)}
+                             checked={this.state.isUploadScormChecked}
+                             />&nbsp;
+                            Upload SCORM Package
+                          </formfield>
+                        </div>
+                        {
+                          this.state.isUploadScormChecked ?
+                          <div className={this.state.validationError && this.state.validationError.selectFileError ? cls_error_element : cls_element}>
+                            <input type="file" accept="application/zip" onChange={this.setFile.bind(this)} />
+                          </div>
+                          : null
+                        }
                       </div>
                     </div>
                   </div>
@@ -260,6 +336,8 @@ class AddQuestionnaire extends Component {
         </div>
       </div>
     );
+    }
+    return <Loading loadType="upload" />;
   }
 }
 

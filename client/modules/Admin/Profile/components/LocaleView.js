@@ -40,7 +40,7 @@ export class LocaleView extends Component {
   Responsible : Prateek*/ 
   
   render() {
- //console.log('this.props',this.props);
+    console.log('this.props',this.props);
     this.clsContainerRight = `${styles.containerRight} pull-right`;
     if(this.props && this.props.profileData && this.props.profileData.locale){
       this.strTimezone = this.props.profileData.locale.timezone;
@@ -94,7 +94,7 @@ export class LocaleView extends Component {
                     </div>*/}
                     <div className={cls_inlineEditGroup}>
                       <label htmlFor="Prefered Language"><FormattedMessage id='prefered_language' />:</label>
-                      <div className={styles.inlineEdit}>{this.strPreferedlanguage ? this.strPreferedlanguage : "-"}</div>
+                      <div className={styles.inlineEdit}>{this.strPreferedlanguage ? this.strPreferedlanguage : this.props.locale == 'en' ? "English" : (this.props.locale == 'hi' ? "Hindi" : this.props.locale == 'fa' ? "Persian": this.props.locale )}</div>
                     </div>
                   </div>
                 </div>

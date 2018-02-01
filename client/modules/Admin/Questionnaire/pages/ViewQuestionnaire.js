@@ -16,7 +16,7 @@ import {editQuestionnaireSchema} from '../schema/QuestionnaireSchema';
 import SubMenu from '../../../../components/SubMenu';
 import TopMenu from '../../../../components/TopMenu';
 
-import {questionnaireViewSubMenu, questionnaireViewMainMenu} from '../schema/QuestionnaireMenu';
+import {questionnaireViewSubMenu, questionnaireViewMainMenu, scormQuestionnaireViewSubMenu } from '../schema/QuestionnaireMenu';
 
 // Import Style
 import styles from '../../../../components/component.css';
@@ -183,7 +183,7 @@ class ViewQuestionnaire extends Component {
         </div>
   
         <div className={cls_isubmenu}>
-          <SubMenu data={questionnaireViewSubMenu} />
+          <SubMenu data={this.props.questionnaireData.data && this.props.questionnaireData.data.questionnaireType === 'scorm' ? scormQuestionnaireViewSubMenu : questionnaireViewSubMenu} />
         </div>
         <QuestionnaireView questionnaireData={this.props.questionnaireData.data} error = {this.props.questionnaireData.error} success = {this.props.questionnaireData.success} clear = {this.clear} loading = {this.state.loading}/>
       </div>

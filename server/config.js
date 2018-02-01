@@ -1,9 +1,9 @@
 const config = {
-  mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/instavc_shiva',
+  mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/instavc_be',
 
   port: process.env.PORT || 8002,
-  confLink : 'https://test9.instavc.com/',
-  domin : process.env.DOMAIN || 'test9.instavc.com',
+  confLink : 'https://rp.instavc.com/',
+  domin : process.env.DOMAIN || 'rp.instavc.com',
   language : 'en',
 	location : [
 							['https://localmcu.instavc.com', 'India Development'],
@@ -21,13 +21,13 @@ const config = {
       credential : "admin123",
       username : "admin"
     } ],
-  isSignUp : false,
+  isSignUp : true,
   isGoogleSignIn : false,
   isCaptcha: false,
   failLimit: 5,
   captcha_sitekey: "6Lc8hC4UAAAAAJFrYqExB4FE4CIy8aloD-aLO1Iq",
-  googleEnable : false,
-  facebookEnable : false,
+  googleEnable : true,
+  facebookEnable : true,
   iosProduction: false,
   fullCalendar: false,
   broadCast: false,
@@ -47,7 +47,7 @@ const config = {
     name : 'instaVC',
     company : 'PeopleLink Unified Communications Pvt. Ltd.'
   },
-  bussinessType : 'Conference',    // LMS (or) Conference (or) CRM (or) Presenter
+  bussinessType : 'LMS',    // LMS (or) Conference (or) CRM (or) Presenter
   smtp : {
     host : 'smtp.mailgun.org',
     port : 587,

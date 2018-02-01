@@ -47,9 +47,10 @@ class Radio extends Component {
     if(this.props && this.props.data){
       let self = this;
       renderButtons = this.props.data.data.map(function(doc){
+        let id = self.props.data._id + '_' + doc[0];
         return(
           <span className={cls_radioNewProfile} key={doc[0]}>
-            <input type="radio" id={self.props.data._id} name ={self.props.data._id} value={doc[0]} onChange={self.changeHandler.bind(this)} checked={self.state.value == doc[0]}/> {doc[0]}
+            <input type="radio" id={id} name ={self.props.data._id} value={doc[0]} onChange={self.changeHandler.bind(this)} checked={self.state.value == doc[0]}/> {doc[0]}
           </span>
           )
       });

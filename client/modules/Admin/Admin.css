@@ -472,12 +472,40 @@ hr {padding: 0!important; margin: 0!important;}
   padding: 19px 15px
 }
 
-.qleditor video,.qleditor img, .qleditor iframe {
+.qleditor video, .qleditor img, .qleditor iframe {
   position : relative !important;
-  width : 700px !important;
-  height : 300px !important
+  width : 100% !important;
+  max-width: 440px !important;
+  height : 300px !important;
 }
 
+/* for drag and drop css for list*/
+
+.dragList {
+  padding: 10px 15px;
+  background:#eee;
+  margin-top:8px ; 
+  &:hover {
+    background: darken(#eee, 5%);
+  }
+}
+
+.dragBlockList{
+  list-style: none;
+  margin:0;
+  padding:0;
+}
+
+.placeholder {
+  background: rgb(255,240,120);
+  &:before {
+    content: "Drop here";
+    color: rgb(225,210,90);
+  }
+}
+.topicTxt {overflow: hidden; text-overflow: ellipsis;}
+
+.modalBoxContent{ max-height: 300px; overflow-y: scroll; }
 
 
 /************* RESPONSIVE DESIGN FOR SMALL DEVICES *********************************/
@@ -546,7 +574,6 @@ hr {padding: 0!important; margin: 0!important;}
   /*width: 40px;*/
   height: 140px;
 }
-
 
 
 /************* RESPONSIVE DESIGN FOR SMALL DEVICES *********************************/

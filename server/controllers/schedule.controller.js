@@ -14,6 +14,7 @@ import serverConfig from '../config';
 import { checkValidRequest } from '../authorization';
 import * as EmailForUserCreation from '../emailFunctions';
 import {addSlash} from './slashesActions';
+import { sendPushNotificationAndroid } from './mobile.controller';
 
 var _ = require('lodash');
 var mongoose = require('mongoose');
@@ -26,9 +27,31 @@ export function fetchMyRoomsSchedule(req, res){
   // Varifying request is valid or not
   checkValidRequest(header, function(person){
     try{
-
       //code added by - Najib, Desc - Checking company Id is set or not as per change made in "checkValidRequest"
-      if (person != null && person.profile.companyid && person.profile.companyid._id) {
+      
+      if (person != null && person.role == Roles.Superadmin) {
+        let objEntity = {
+          uid : person._id,
+          role : person.role,
+          cid : null
+        }
+        // get selector for fetch rooms according to role
+        fetchRoomSelector(objEntity, function(selector, instructorIds){
+          if(selector != null){
+            let query = Room.find(selector).select('roomName selPackage').populate('selPackage', 'features');
+            executeRoomQuery(query, function(err, doc, ids){
+              if(doc != null){
+                getTopics(ids, doc, function(response){
+                  if(response == null)
+                    res.json({ status: true, data: doc, topics : {} });
+                  else
+                    res.json({ status: true, data: doc, topics : response });
+                });
+              }else res.json({ status: false });
+            });
+          } else res.json({ status : false });
+        });
+      } else if (person != null && person.profile.companyid && person.profile.companyid._id) {
         let objEntity = {
           uid : person._id,
           role : person.role,
@@ -125,6 +148,7 @@ export function createSchedule (req, res) {
                   fullname : fullname,
                   email : person.email,
                   roomid : entity.roomId,
+                  roomName : roomName,
                   uid : person._id,
                   start : obj.todayStart,
                   end : obj.todayEnd
@@ -291,6 +315,7 @@ export function updateSchedule (req, res) {
                       fullname : fullname,
                       email : person.email,
                       roomid : entity.roomId,
+                      roomName : roomName,
                       uid : person._id,
                       start : obj.todayStart,
                       end : obj.todayEnd
@@ -390,7 +415,8 @@ export function updateSlotScheule(req, res) {
                 startTime : obj.startTime,
                 endTime : obj.endTime,
                 slotId : obj._id,
-                meetingName : schedule.meetingName
+                meetingName : schedule.meetingName,
+                roomName : schedule.roomId.roomName
               };
               updateEntity['lastname'] = person.lastname ? person.lastname : null;
               if (obj.endTime > schedule.endDate) {
@@ -848,7 +874,8 @@ export function deleteMyRecurringSchedule(req, res){
                           subject : 'The Schedule Deleted',
                           userBody : 'The pre-scheduled class on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by '+'<b>' + createdBy + '</b>'+'.',
                           operatorBody : 'The pre-scheduled class on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by you.',
-                          email : person.email
+                          email : person.email,
+                          message : 'The pre-scheduled meeting '+schedule.meetingName+' has been deleted successfully.'
                         };
 
                       sendInstructorSchEmail(instructorObj);
@@ -859,6 +886,7 @@ export function deleteMyRecurringSchedule(req, res){
                         body : 'The pre-scheduled conference on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by '+'<b>' + createdBy + '</b>'+'.',
                         createdBy : schedule.createdBy,
                         createdBody : 'The pre-scheduled conference on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by '+'<b>' + 'you' + '</b>'+'.',
+                        message : 'The pre-scheduled meeting '+schedule.meetingName+' has been deleted successfully.'
                       };
                       sendScheduleEmail(schObj);
                     }
@@ -922,7 +950,8 @@ export function deleteMySchedule(req, res){
                           subject : 'The Schedule Deleted',
                           userBody : 'The pre-scheduled class on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by '+'<b>' + createdBy + '</b>'+'.',
                           operatorBody : 'The pre-scheduled class on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by you.',
-                          email : person.email
+                          email : person.email,
+                          message : 'The pre-scheduled meeting '+schedule.meetingName+' has been  deleted successfully.'
                         };
 
                       sendInstructorSchEmail(instructorObj);
@@ -933,6 +962,7 @@ export function deleteMySchedule(req, res){
                         body : 'The pre-scheduled conference on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by '+'<b>' + createdBy + '</b>'+'.',
                         createdBy : schedule.createdBy,
                         createdBody : 'The pre-scheduled conference on '+'<b>' + schedule.meetingName + '</b> '+' has been successfully deleted by '+'<b>' + 'you' + '</b>'+'.',
+                        message : 'The pre-scheduled meeting '+schedule.meetingName+' has been deleted successfully.'
                       };
                       sendScheduleEmail(schObj);
                     }
@@ -1166,8 +1196,20 @@ function updateScheduleCallback(obj, schedule, cb) {
                 subject : 'The Schedule Updated',
                 userBody : 'The class on '+'<b>' + schedule.meetingName + '</b>'+' has been updated from '+'<b>' +  moment(schedule.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(schedule.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC) to <b>' +  moment(obj.entity.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(obj.entity.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC) by <b>' + obj.fullname + '</b>.',
                 operatorBody : 'The class on '+'<b>' + schedule.meetingName + '</b>'+' has been updated from '+'<b>' +  moment(schedule.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(schedule.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC) to <b>' +  moment(obj.entity.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(obj.entity.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> by you.',
-                email : obj.email
+                email : obj.email,
+                message :'The class '+schedule.meetingName+' has been updated to Course '+ obj.roomName +' at ' +moment(obj.entity.startDate).utc().format('DD-MM-YYYY hh:mm A')+'(UTC) -  to '+moment(obj.entity.endDate).utc().format('DD-MM-YYYY hh:mm A') + '(UTC).'
               };
+              if (obj.entity && obj.entity.pattern) {
+                instructorObj["message"] = 'The class '+schedule.meetingName+' has been updated to Course '+ obj.roomName+'  from ' +moment(obj.entity.startDate).utc().format('DD-MM-YYYY')+' to '+moment(obj.entity.endDate).utc().format('DD-MM-YYYY') + ' :: ' +moment(obj.entity.startDate).utc().format('hh:mm A')+ ' - ' + moment(obj.entity.endDate).utc().format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+              }
+              if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                instructorObj["userBody"] = 'The class on '+'<b>' + schedule.meetingName + '</b>'+' has been updated from '+'<b>' +  moment(schedule.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(schedule.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +') to <b>' +  moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +') by <b>' + obj.fullname + '</b>.',
+                instructorObj["operatorBody"] = 'The class on '+'<b>' + schedule.meetingName + '</b>'+' has been updated from '+'<b>' +  moment(schedule.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(schedule.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +') to <b>' +  moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> by you.';
+                instructorObj["message"] = 'The class '+schedule.meetingName+' has been updated to Room '+ obj.roomName +' at ' +moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A')+'('+serverConfig.mail_timezone.code +') to '+moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +').';
+                if (obj.entity && obj.entity.pattern) {
+                  instructorObj["message"] = 'The class '+schedule.meetingName+' has been updated to Course '+ obj.roomName+'  from ' +moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY')+' to '+moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY') + ' :: ' +moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' - ' + moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+                }
+              }
               sendInstructorSchEmail(instructorObj);
             } else {
               let schObj = {
@@ -1176,7 +1218,19 @@ function updateScheduleCallback(obj, schedule, cb) {
                 body : 'The conference on '+'<b>' + schedule.meetingName + '</b>'+' has been updated at '+'<b>' +  moment(schedule.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(schedule.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC) to <b>' +  moment(obj.entity.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(obj.entity.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC) <b> by <b>' + obj.fullname + '</b>.',
                 createdBy : schedule.createdBy,
                 createdBody : 'The conference on '+'<b>' + schedule.meetingName + '</b>'+' has been updated at '+'<b>' +  moment(schedule.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(schedule.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC) to <b>' +  moment(obj.entity.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(obj.entity.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC) <b> by <b>' + 'you' + '</b>.',
+                message :'The conference meeting '+schedule.meetingName+' has been updated to Room '+ obj.roomName +' at ' +moment(obj.entity.startDate).utc().format('DD-MM-YYYY hh:mm A')+'(UTC) - to '+moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '(UTC).'
               };
+              if (obj.entity && obj.entity.pattern) {
+                schObj["message"] = 'The conference meeting '+schedule.meetingName+' has been updated to Room '+ obj.roomName+'  from ' +moment(obj.entity.startDate).utc().format('DD-MM-YYYY')+' to '+moment(obj.entity.endDate).utc().format('DD-MM-YYYY') + ' :: ' +moment(obj.entity.startDate).utc().format('hh:mm A')+ ' - ' + moment(obj.entity.endDate).utc().format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+              }
+              if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                schObj["body"] = 'The class on '+'<b>' + schedule.meetingName + '</b>'+' has been updated from '+'<b>' +  moment(schedule.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(schedule.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +') to <b>' +  moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +') by <b>' + obj.fullname + '</b>.';
+                schObj["createdBody"] = 'The class on '+'<b>' + schedule.meetingName + '</b>'+' has been updated at '+'<b>' +  moment(schedule.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(schedule.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +') to <b>' +  moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> by you.';
+                schObj["message"] = 'The conference meeting '+schedule.meetingName+' has been updated to Room '+ obj.roomName +' at ' +moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A')+'('+serverConfig.mail_timezone.code +') to '+moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +').';
+                if (obj.entity && obj.entity.pattern) {
+                  schObj["message"] = 'The conference meeting '+schedule.meetingName+' has been updated to Course '+ obj.roomName+'  from ' +moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY')+' to '+moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY') + ' :: ' +moment(obj.entity.startDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' - ' + moment(obj.entity.endDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+                }
+              }
               sendScheduleEmail(schObj);
             }
           }
@@ -1223,17 +1277,30 @@ function updateSlotScheduleCallback (objEntity, cb) {
             subject : 'Schedule Updated',
             userBody : 'The class on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been updated at '+ '<b>' + moment(objEntity.starttime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endtime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)' +' to ' + '<b>' + moment(objEntity.startTime).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endTime).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)' +' by '+ '<b>' + createdBy+ '</b>'+'.',
             operatorBody :  'The class on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been successfully updated at '+ '<b>' + moment(objEntity.starttime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endtime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)' +' to ' + '<b>' + moment(objEntity.startTime).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endTime).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)'+' by you.',
-            email : objEntity.email
+            email : objEntity.email,
+            message :'The conference meeting '+objEntity.meetingName+' has been updated to Room '+ objEntity.roomName +' at ' +moment(objEntity.startTime,'x').utc().format('DD-MM-YYYY hh:mm A')+'(UTC) to '+moment(objEntity.endTime,'x').utc().format('DD-MM-YYYY hh:mm A') + '(UTC).'
+
           };
+          if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                instructorObj["userBody"] =  'The class on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been updated at '+ '<b>' + moment(objEntity.starttime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+serverConfig.mail_timezone.code +')' + moment(objEntity.endtime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')' +' to ' + '<b>' + moment(objEntity.startTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')<b> - ' + moment(objEntity.endTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')' +' by '+ '<b>' + createdBy+ '</b>'+'.';
+                instructorObj["operatorBody"] = 'The class on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been successfully updated at '+ '<b>' + moment(objEntity.starttime, 'x').tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')<b> - ' + moment(objEntity.endtime, 'x').tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')' +' to ' + '<b>' + moment(objEntity.startTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')<b> - ' + moment(objEntity.endTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')'+' by you.';
+                instructorObj["message"] = 'The class '+objEntity.meetingName+' has been updated to Room '+ objEntity.roomName +' at ' +moment(objEntity.startTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A')+'('+serverConfig.mail_timezone.code +') to '+moment(objEntity.endTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +').';
+          }
           sendInstructorSchEmail(instructorObj);
         } else {
           let schObj = {
             roomId : objEntity.roomId,
             subject : 'The Schedule Updated',
             body : 'The conference on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been updated at '+ '<b>' + moment(objEntity.starttime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endtime).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b>' +' to ' + '<b>' + moment(objEntity.startTime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endTime, 'x').utc().format('DD-MM-YYYY hh:mm A') +'</b>(UTC)' + ' by '+ '<b>' + createdBy+ '</b>'+'.',
-            createdBy  : objEntity.createdBy,
+            createdBy  : objEntity.uid,
             createdBody : 'The conference on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been updated at '+ '<b>' + moment(objEntity.starttime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endtime).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b>' +' to ' + '<b>' + moment(objEntity.startTime, 'x').utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(objEntity.endTime, 'x').utc().format('DD-MM-YYYY hh:mm A') +'</b>(UTC)' + ' by '+ '<b>' + 'you'+ '</b>'+'.',
+            message :'The conference meeting '+objEntity.meetingName+' has been updated to Room '+ objEntity.roomName +' at ' +moment(objEntity.startTime,'x').utc().format('DD-MM-YYYY hh:mm A')+'(UTC) to '+moment(objEntity.endTime).utc().format('DD-MM-YYYY hh:mm A') + '(UTC).'
           };
+          if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                schObj["body"] =  'The class on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been updated at '+ '<b>' + moment(objEntity.starttime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+serverConfig.mail_timezone.code +')' + moment(objEntity.endtime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')' +' to ' + '<b>' + moment(objEntity.startTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')<b> - ' + moment(objEntity.endTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')' +' by '+ '<b>' + createdBy+ '</b>'+'.';
+                schObj["createdBody"] = 'The class on '+'<b>' + objEntity.meetingName + '</b>' + ' scheduling has been successfully updated at '+ '<b>' + moment(objEntity.starttime, 'x').tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')<b> - ' + moment(objEntity.endtime, 'x').tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')' +' to ' + '<b>' + moment(objEntity.startTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')<b> - ' + moment(objEntity.endTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+serverConfig.mail_timezone.code +')'+' by you.';
+                schObj["message"] = 'The class '+objEntity.meetingName+' has been updated to Room '+ objEntity.roomName +' at ' +moment(objEntity.startTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A')+'('+serverConfig.mail_timezone.code +') to '+moment(objEntity.endTime).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +').';
+          }
           sendScheduleEmail(schObj);
         }
       }
@@ -1242,6 +1309,14 @@ function updateSlotScheduleCallback (objEntity, cb) {
     console.log("e in updateSlotScheduleCallback === ", e);
     cb("Internal server error, Please try again", null);
   }
+}
+
+export function sendScheduleMobileNotification(message, sentBy, sentTo) {
+  Users.findOne({ _id : sentTo }, function(err, user) {
+    if (user && user.deviceType == 'ANDROID' && user.deviceId != "") {
+      sendPushNotificationAndroid("SCHEDULE", message, user.deviceId, sentBy, sentTo);
+    }
+  });
 }
 
 export function sendInstructorSchEmail(obj){
@@ -1263,6 +1338,7 @@ export function sendInstructorSchEmail(obj){
       let emailData = [];
       for(let i = 0; i < doc.students.length; i++) {
         emailData.push(doc.students[i].email);
+        sendScheduleMobileNotification(obj.message, obj.instId, doc.students[i]._id);
       } 
 
       let exchangeData = {
@@ -1336,7 +1412,8 @@ export function sendScheduleEmail (obj) {
                 subject : obj.subject,
                 body : obj.createdBody,
                 descreption : 'Ignore mail if not relevant.'
-              };            
+              };
+                      
               
               // EmailForUserCreation.defaultUserMail(createdByUserData, function(emailerror, emailsuccess) {
               //   if (emailerror.status == false) {
@@ -1349,6 +1426,7 @@ export function sendScheduleEmail (obj) {
             } else {
               exchangeData['body'] = obj.body;
               emailData.push(doc.users[i].email);
+              sendScheduleMobileNotification(obj.message, obj.createdBy, doc.users[i]._id);
             }
             let studentMails = [];
             if (doc.users[i].role == Roles.Instructor) {
@@ -1357,6 +1435,7 @@ export function sendScheduleEmail (obj) {
                 if (studentData) {
                   _.each(studentData.students, function(student) {
                     studentMails.push(student.email);
+                    sendScheduleMobileNotification(obj.message, obj.createdBy, student._id);
                   });
                 }
                 //console.log('studentMails', studentMails)
@@ -1457,17 +1536,45 @@ export function saveScheduleCallback(obj, cb){
                 subject : 'The Schedule Created',
                 userBody : 'The class on '+'<b>' + doc.meetingName + '</b>'+' has been scheduled at '+'<b>' +  moment(doc.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(doc.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)' + ' by '+'<b>' + obj.fullname + '</b>'+'.',
                 operatorBody : 'The class on '+'<b>' + doc.meetingName + '</b>'+' has been successfully scheduled at '+'<b>' +  moment(doc.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(doc.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)' + ' by you.',
-                email : obj.email
+                email : obj.email,
+                message : 'The class '+doc.meetingName+' has been scheduled to Course '+ obj.roomName+'  at ' +moment(doc.startDate).utc().format('DD-MM-YYYY hh:mm A')+'(UTC) to '+moment(doc.endDate).utc().format('DD-MM-YYYY hh:mm A') + '(UTC).'
               };
+
+              if (obj.entity && obj.entity.pattern) {
+                instructorObj["message"] = 'The class '+doc.meetingName+' has been scheduled to Course '+ obj.roomName+'  from ' +moment(doc.startDate).utc().format('DD-MM-YYYY')+' to '+moment(doc.endDate).utc().format('DD-MM-YYYY') + ' :: ' +moment(doc.startDate).utc().format('hh:mm A')+ ' - ' + moment(doc.endDate).utc().format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+              }
+              if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                instructorObj["userBody"] = 'The class on '+'<b>' + doc.meetingName + '</b>'+' has been scheduled at '+'<b>' +  moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')' + ' by '+'<b>' + obj.fullname + '</b>'+'.';
+                instructorObj["operatorBody"] = 'The class on '+'<b>' + doc.meetingName + '</b>'+' has been successfully scheduled at '+'<b>' +  moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')' + ' by you.';
+                instructorObj["message"] = 'The class '+doc.meetingName+' has been scheduled to Course '+ obj.roomName+'  at ' +moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A')+'('+serverConfig.mail_timezone.code +') to '+moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +').';
+                if (obj.entity && obj.entity.pattern) {
+                instructorObj["message"] = 'The class '+doc.meetingName+' has been scheduled to Course '+ obj.roomName+'  from ' +moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY')+' to '+moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY') + ' :: ' +moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' - ' + moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+                }
+              }
+
               sendInstructorSchEmail(instructorObj);
             } else {
               let schObj = {
                 roomId : obj.roomid,
                 subject : 'The Schedule Created',
                 body : 'The conference on '+'<b>' + doc.meetingName + '</b>'+' has been scheduled at '+'<b>' +  moment(doc.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(doc.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)' + ' by '+'<b>' + obj.fullname + '</b>'+'.',
+                // message : 'The conference on ' + doc.meetingName + ' has been scheduled at ' +  moment(doc.startDate).utc().format('DD-MM-YYYY hh:mm A') + '(UTC) - ' + moment(doc.endDate).utc().format('DD-MM-YYYY hh:mm A') + '(UTC).',
+                message : 'The conference meeting name '+doc.meetingName+' has been scheduled to Room '+ obj.roomName+'  at ' +moment(doc.startDate).utc().format('DD-MM-YYYY hh:mm A')+'(UTC) to '+moment(doc.endDate).utc().format('DD-MM-YYYY hh:mm A') + '(UTC).',
                 createdBy  : doc.createdBy,
                 createdBody : 'The conference on '+'<b>' + doc.meetingName + '</b>'+' has been scheduled at '+'<b>' +  moment(doc.startDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)<b> - ' + moment(doc.endDate).utc().format('DD-MM-YYYY hh:mm A') + '</b>(UTC)' + ' by '+'<b>' + 'you' + '</b>'+'.',
               };
+
+              if (obj.entity && obj.entity.pattern) {
+                schObj["message"] = 'The conference meeting name '+doc.meetingName+' has been scheduled to Course '+ obj.roomName+'  from ' +moment(doc.startDate).utc().format('DD-MM-YYYY')+' to '+moment(doc.endDate).utc().format('DD-MM-YYYY') + ' :: ' +moment(doc.startDate).utc().format('hh:mm A')+ ' - ' + moment(doc.endDate).utc().format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+              }
+              if (serverConfig.mail_timezone && serverConfig.mail_timezone.zone) {
+                schObj["body"] = 'The conference on '+'<b>' + doc.meetingName + '</b>'+' has been scheduled at '+'<b>' +  moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')' + ' by '+'<b>' + obj.fullname + '</b>'+'.';
+                schObj["createdBody"] = 'The conference on '+'<b>' + doc.meetingName + '</b>'+' has been scheduled at '+'<b>' +  moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')<b> - ' + moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '</b>('+ serverConfig.mail_timezone.code +')' + ' by '+'<b>' + 'you' + '</b>'+'.';
+                schObj["message"] = 'The conference meeting name '+doc.meetingName+' has been scheduled to Room '+ obj.roomName+'  at ' +moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A')+'('+serverConfig.mail_timezone.code +') to '+moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY hh:mm A') + '('+ serverConfig.mail_timezone.code +').';
+                if (obj.entity && obj.entity.pattern) {
+                  schObj["message"] = 'The conference meeting name '+doc.meetingName+' has been scheduled to Course '+ obj.roomName+'  from ' +moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY')+' to '+moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('DD-MM-YYYY') + ' :: ' +moment(doc.startDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' - ' + moment(doc.endDate).tz(serverConfig.mail_timezone.zone).format('hh:mm A')+ ' ('+ serverConfig.mail_timezone.code +').';
+                }
+              }
               sendScheduleEmail(schObj);
             }
           }

@@ -20,10 +20,10 @@ class TopicData extends Component{
 		if(!this.props.isGuest) {
     	browserHistory.push('/profile/'+this.props.data.createdBy._id);			
 		}
-  }
+  	}
 
 	render(){
-		let cls_topicAuthor = `clearfix ${styles.topicAuthor}`;
+	let cls_topicAuthor = `clearfix ${styles.topicAuthor}`;
 		let cls_topicAuthorGuest = `clearfix ${styles.topicAuthorGuest}`;
 		let data = this.props.data
     let profileImage = data ? data.createdBy ? data.createdBy.profile ? data.createdBy.profile.profileImage:'':'':''
@@ -37,7 +37,13 @@ class TopicData extends Component{
 				<li>
 					<Row>
 						<div className={styles.listTitle}>
-							<Link id="fullTopic" onClick={this.handleFullTopic.bind(this)}>{this.props.data.topicName}</Link>
+							<Link id="fullTopic" onClick={this.handleFullTopic.bind(this)}>{
+								this.props.data.topicIndex ?
+									<span>{this.props.data.topicIndex}{"."} {this.props.data.topicName}</span>
+									: 
+									<span>{this.props.data.topicName}</span>
+							}
+							</Link>
 						</div>
 					</Row>
 					<Row>

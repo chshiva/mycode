@@ -8238,14 +8238,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }], [{
 	    key: 'create',
 	    value: function create(value) {
-				if(value.startsWith('data')) {
+				if(value.startsWith('data') || value.search('quill') != -1) {
 					Video.tagName = 'VIDEO'
 				} else {
 					Video.tagName = 'IFRAME'
 				}
 				var node = _get(Video.__proto__ || Object.getPrototypeOf(Video), 'create', this).call(this, value);
 				node.setAttribute('src', this.sanitize(value));
-				if(value.startsWith('data')) {
+				if(value.startsWith('data') || value.search('quill') != -1) {
 					node.setAttribute("controls", "controls");  
 					node.setAttribute("controlsList", "nodownload")					
 				} else {		
@@ -8274,7 +8274,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return domNode.getAttribute('src');
 	    }
 	  }]);
-
 	  return Video;
 	}(_block.BlockEmbed);
 
@@ -8282,7 +8281,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Video.className = 'ql-video';
 	// Video.tagName = 'IFRAME';
 	
-
 	exports.default = Video;
 
 /***/ },
@@ -9804,8 +9802,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                  var range = _this3.quill.getSelection(true);
 	                  _this3.quill.updateContents(new _delta2.default().retain(range.index).delete(range.length).insert({ image: e.target.result }), _emitter2.default.sources.USER);
 	                  fileInput.value = "";
-	                };
-	                reader.readAsDataURL(fileInput.files[0]);
+									};
+									var file = fileInput.files[0]
+									if(file.size>20971520) {
+										window.alert('File Size should be less than 20MB!..')
+									} else {
+										let fileFormat = file.name.split(".");
+										let length = fileFormat.length;
+										let typeOfFile = _.trim(fileFormat[length-1]);
+										let allowedFormats = _.map(['png','jpeg','jpg','gif'], _.trim);
+										if(allowedFormats.includes(typeOfFile)) {
+											reader.readAsDataURL(file);        
+										} else {
+											window.alert('File Not Supported');
+										}  
+									}	                
 	              }
 	            });
 	            this.container.appendChild(fileInput);
@@ -9829,7 +9840,20 @@ return /******/ (function(modules) { // webpackBootstrap
 										_this3.quill.updateContents(new _delta2.default().retain(range.index).delete(range.length).insert({ video : e.target.result }), _emitter2.default.sources.USER);
 										fileInput.value = "";
 									};
-									reader.readAsDataURL(fileInput.files[0]);
+									var file = fileInput.files[0]
+									if(file.size>20971520) {
+										window.alert('File Size should be less than 20MB!..')
+									} else {
+										let fileFormat = file.name.split(".");
+										let length = fileFormat.length;
+										let typeOfFile = _.trim(fileFormat[length-1]);
+										let allowedFormats = _.map(['mp4','webm'], _.trim);
+										if(allowedFormats.includes(typeOfFile)) {
+											reader.readAsDataURL(file);        
+										} else {
+											window.alert('File Not Supported');
+										}     										
+									}	  
 								}
 							});
 							this.container.appendChild(fileInput);

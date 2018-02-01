@@ -12,6 +12,7 @@ loginroute.route('/isresettokenexpired').post(LoginController.isResetTopkenExpir
 loginroute.route('/isSignUp').get(LoginController.isSignUp);
 loginroute.route('/get-footer').get(LoginController.getFooter);
 loginroute.route('/activate-user/:token').put(LoginController.activateUserThroughMail);
+loginroute.route('/server-config').get(LoginController.getServerConfig);
 //loginroute.route('/logout-user').get(LoginController.logoutUser);
 
 export default loginroute;

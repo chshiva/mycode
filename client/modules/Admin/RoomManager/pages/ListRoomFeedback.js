@@ -41,6 +41,7 @@ class ListRoomFeedback extends Component {
     this.submenu.menus[3].action = this.roomConfiguration.bind(this);
     this.submenu.menus[4].action = this.listAssignments.bind(this);
     this.submenu.menus[5].action = this.courseReports.bind(this);
+    this.submenu.menus[6].action = this.listCertificates.bind(this);
     this.state = { 
       //searchValue : '',
       showFeedback: false,

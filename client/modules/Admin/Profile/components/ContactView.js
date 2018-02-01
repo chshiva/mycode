@@ -673,14 +673,14 @@ export class ContactView extends Component {
       gender: gender,
       startDate: dob      
     });  
-    console.log("this.state.startDate", this.state.startDate);
-    console.log("this.props.loggedInData.data.profile.dateofbirth", this.props.loggedInData.data.profile.dateofbirth);
-    console.log("dob", dob);
+    // console.log("this.state.startDate", this.state.startDate);
+    // console.log("this.props.loggedInData.data.profile.dateofbirth", this.props.loggedInData.data.profile.dateofbirth);
+    // console.log("dob", dob);
   }
 
   render () {
 
-    console.log("reder start date", this.state.startDate);
+    // console.log("reder start date", this.state.startDate);
     // console.log(this.state.websiteDropdownCss);
     let addInfoBlock = `${weStyles.addInfoBlock} clearfix`;
     let iconBox = `${weStyles.iconBox} pull-left`;
@@ -763,8 +763,14 @@ export class ContactView extends Component {
     // }     
     
     const {startDateFormat, startDateInputFormat, startDateMode} = this.state;
-    const startDate = moment().format('DD/MM/YYYY');
-
+    var userBirthInfo = this.props.loggedInData.data.profile.dateofbirth;
+    let startDate = moment().format('DD/MM/YYYY');
+    if(userBirthInfo) {
+      startDate = moment(userBirthInfo).format("DD/MM/YYYY");
+      // var userBirthYear = Moment(userBirthInfo).format("YYYY");
+    } else {
+      startDate = this.state.startDate && moment(this.state.startDate).isValid()?this.state.startDate:moment().format('DD/MM/YYYY');
+    }
     const showAddAddressModal = this.state.showAddAddressModal
     ?
     <Modal show={this.state.showAddAddressModal} onHide={this.hideAddAddressModal.bind(this)}>
@@ -831,7 +837,7 @@ export class ContactView extends Component {
             <label htmlFor="inputBirthday" className="control-label col-md-3" ><FormattedMessage id = 'birthday'/><span className={compStyles.mandatory}>*</span>:</label>
             <div id="birthday" className="col-md-9">
               <DateTimeField                
-                dateTime={this.state.startDate?this.state.startDate:startDate}                                              
+                dateTime={startDate}                                              
                 format={startDateFormat}
                 inputFormat={startDateInputFormat}
                 onChange={this.handleStartDate.bind(this)}

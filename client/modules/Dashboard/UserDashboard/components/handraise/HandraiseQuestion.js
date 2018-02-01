@@ -228,7 +228,9 @@ class HandraiseQuestion extends Component{
 				</Link>
 				<div className={this.props.guestStatus ? styles.guestNameQuestion : styles.nameQuestion}>
 					<h2>{data && data.author && data.author.firstname && data.author.lastname ? (data.author.firstname + ' ' + data.author.lastname) : (data && data.author && data.author.firstname ? data.author.firstname : 'User Name')}</h2>
-					<p>{data && data.question}</p>
+					<p>{data && data.question.split('\\n').map((item, key) => {
+						return <span key={key}>{item}<br/></span>
+					})}</p>
 					<p className={styles.timeDisplay}>{time}</p>
 				</div>
 			</div>

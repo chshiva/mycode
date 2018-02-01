@@ -1085,9 +1085,28 @@ export function courseTopics(req,res) {
           error : "Invalid request."
         });
       } else {
-          //fetching topic names based on the courseId and topicEnable
-        Topic.find({roomId:req.params.rId,topicEnable:true})
-        .select('_id topicName')
+        Topic.aggregate([
+          {
+            $match:{
+              roomId:req.params.rId,
+              topicEnable:true
+            }
+          },
+          {
+              $project: {
+                  _id: 1,
+                  topicName: 1,
+                  sort: {
+                    $cond: [{$not: ["$topicIndex"]}, "$createdAt", "$topicIndex"]
+                  }
+              }
+          },
+          {
+              $sort: {
+                  sort: 1
+              }
+          }
+        ])
         .exec(function(topicErr,topicData) {
           if(topicErr) {
             res.json({
@@ -1098,7 +1117,7 @@ export function courseTopics(req,res) {
             res.json({
               status: true,
               data:topicData
-            });
+            })
           }
         });
       }

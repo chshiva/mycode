@@ -24,7 +24,7 @@ var _ = require('lodash');
 export class FeedbackTypeDefault extends Component {  
   constructor(props) {
     super(props);    
-    this.form = {};
+    this.form = [];
     this.roles = '';
   }
 
@@ -36,11 +36,24 @@ export class FeedbackTypeDefault extends Component {
 
   }
 
-  handleRadioChange = (e) => {
-    let name = e.currentTarget.name;
+  handleRadioChange = (e) => {    
     let value = e.currentTarget.value;
-    this.form[name] = [value];    
-    //console.log("this.form === ",this.form );
+    let question = [
+      {
+        "insert" : e.currentTarget.name
+      }
+    ];
+    let obj = {};    
+    let index = _.findIndex(this.form, function(formData) {
+      return _.isEqual(formData.question, question)
+    });
+    if(index === -1) {
+      obj['question'] = question;
+      obj['answer'] = [value];
+      this.form.push(obj);
+    } else {
+      this.form[index]['answer'] = [value]    
+    }     
   }
 
   // handleSubmit = (e) => {
@@ -51,19 +64,18 @@ export class FeedbackTypeDefault extends Component {
   handleSubmit = (e) => {
     e.preventDefault();     
     var data ={};
-    let dataobj = this.form;
-    //console.log("this.form === ",this.form);
-    let isEmpty = _.isEmpty(dataobj);
-    //console.log("is empty", isEmpty);
-    if(isEmpty) {
+    let dataobj = _.remove(this.form, function(n) {
+      return n.answer.length>0;
+    });
+    if(_.isEmpty(dataobj)) {
       this.refs.feedback_container.error("Nothing to save");
     }else {
-      data["feedbacks"] = this.form;
+      data["feedbacks"] = dataobj;
       data["roomKey"] = this.props.roomkey;
       var feedbackData = {
         data
       }
-      console.log("feedbackData === ", feedbackData);
+      // console.log("feedbackData === ", feedbackData);
       this.props.dispatch(saveFeedback(feedbackData)).then(res => this.myUsers(res));
     }
   }
@@ -98,19 +110,19 @@ export class FeedbackTypeDefault extends Component {
       <li>                                  
         <label className={styles.radioBlock}>
           <div className={cls_bgPoor}><FormattedMessage id='poor' /></div>
-          <input id="radioPoor" type="radio" name={name} value = "Poor" className={cls_fbInputRadio} onChange = {this.handleRadioChange} />
+          <input id="radioPoor" type="radio" name={name} value = "Poor" className={cls_fbInputRadio} onClick = {this.handleRadioChange} />
         </label>
         <label className={styles.radioBlock}>
           <div className={cls_bgAvg}><FormattedMessage id='average' /></div>
-          <input id="radioAverage" type="radio" name={name} value = "Average" className={cls_fbInputRadio} onChange = {this.handleRadioChange} />
+          <input id="radioAverage" type="radio" name={name} value = "Average" className={cls_fbInputRadio} onClick = {this.handleRadioChange} />
         </label>
         <label className={styles.radioBlock}>
           <div className={cls_bgGood}><FormattedMessage id='good' /></div>
-          <input id="radioGood" type="radio" name={name} value = "Good" className={cls_fbInputRadio} onChange = {this.handleRadioChange} />
+          <input id="radioGood" type="radio" name={name} value = "Good" className={cls_fbInputRadio} onClick = {this.handleRadioChange} />
         </label>
         <label className={styles.radioBlock}>
           <div className={styles.ratingInfo}><FormattedMessage id='excellent' /></div>
-          <input id="radioExcellent" type="radio" name={name} value ="Excellent" className={cls_fbInputRadio} onChange = {this.handleRadioChange} />
+          <input id="radioExcellent" type="radio" name={name} value ="Excellent" className={cls_fbInputRadio} onClick = {this.handleRadioChange} />
         </label> 
       </li>
     );
@@ -266,23 +278,23 @@ export class FeedbackTypeDefault extends Component {
                                 <ul>
                                   <li>
                                       <label className={styles.ratingNumInput}>
-                                        <input id="rating1" type="radio" value="1" name="Rating" onChange = {this.handleRadioChange}className={cls_fbInputRadio} />
+                                        <input id="rating1" type="radio" value="1" name="Rating" onClick = {this.handleRadioChange}className={cls_fbInputRadio} />
                                         <span className={styles.ratingNum}>1</span>
                                       </label>
                                       <label className={styles.ratingNumInput}>
-                                        <input id="rating2" type="radio" value="2" name="Rating"  onChange = {this.handleRadioChange}className={cls_fbInputRadio} />
+                                        <input id="rating2" type="radio" value="2" name="Rating"  onClick = {this.handleRadioChange}className={cls_fbInputRadio} />
                                         <span className={styles.ratingNum}>2</span>
                                       </label>
                                       <label className={styles.ratingNumInput}>
-                                        <input id="rating3" type="radio" value="3" name="Rating" onChange = {this.handleRadioChange}className={cls_fbInputRadio} />
+                                        <input id="rating3" type="radio" value="3" name="Rating" onClick = {this.handleRadioChange}className={cls_fbInputRadio} />
                                         <span className={styles.ratingNum}>3</span>
                                       </label>
                                       <label className={styles.ratingNumInput}>
-                                        <input id="rating4" type="radio" value="4" name="Rating" onChange = {this.handleRadioChange}className={cls_fbInputRadio} />
+                                        <input id="rating4" type="radio" value="4" name="Rating" onClick = {this.handleRadioChange}className={cls_fbInputRadio} />
                                         <span className={styles.ratingNum}>4</span>
                                       </label>
                                       <label className={styles.ratingNumInput}>
-                                        <input id="rating5" type="radio" value="5" name="Rating" onChange = {this.handleRadioChange} className={cls_fbInputRadio} />
+                                        <input id="rating5" type="radio" value="5" name="Rating" onClick = {this.handleRadioChange} className={cls_fbInputRadio} />
                                         <span className={styles.ratingNum}>5</span>
                                       </label> 
                                   </li>

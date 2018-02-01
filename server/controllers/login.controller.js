@@ -283,7 +283,7 @@ export function validateForgotPassword(req,res){
                     to : validUser.email,
                     subject : 'Reset Password',
                     body : '<span style="margin-top: 30px; font-size: 14px;">'+'Hello '+validUser.firstname+'</span>,'+'<br><br>'+ 'We received a request to reset the password associated with this e-mail address. If you made this request, please follow the instructions below.'+'<br><br>'+'Please click on the link below to reset your password using our secure server'+'<br><br>'+
-                    'http://'+serverConfig.domin+'/resetPassword/'+md5(randomstring)
+                    'https://'+serverConfig.domin+'/resetPassword/'+md5(randomstring)
                   }
 
               EmailForUserCreation.resetRequestMail(exchangeData, function(emailerror, emailsuccess){
@@ -419,6 +419,24 @@ export function isSignUp(req, res) {
 
 export function getFooter(req, res) {
   res.json({message : serverConfig.footer});
+}
+
+export function getServerConfig(req, res) {
+  checkValidRequest(req.headers, function(person) {
+    try{
+      if (person) {
+        res.json({ status: false, error : "Invalid request" });
+      } else {
+        let obj = {
+          domin : serverConfig.domin
+        }
+        res.json({status: true, data : obj});
+      }
+    }catch(e){  
+      console.log(e)
+      res.json({ status : false, error : "Internal server error." });
+    }
+  }) 
 }
 
 

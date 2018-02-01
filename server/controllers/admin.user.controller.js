@@ -2263,3 +2263,40 @@ export function activateUser(req, res) {
     }
 	});      
 }
+
+/*
+@Function Name : clearDeviceid
+@Purpose : "removing the device id at the time of logout in users collection"
+@Request Object :{}
+@Response Object : Success-data, Failure-error 
+@Author : pranathigaddam
+*/
+
+export function clearDeviceid(req,res) {
+    checkValidRequest(req.headers, function(person) {
+    try{
+      if (person == null) {
+        res.json({ status: false, error : "Invalid request" });
+      }
+      else{
+        if(person.deviceType == 'ANDROID') {
+        	Users.update({_id:person._id},{$unset : {deviceType :""}})
+        	.exec(function(error,doc){
+        		if(error) {
+        			// console.log('eror in clearDeviceid' )
+        		} else {
+        			// console.log('cleard device id')
+        		}
+        	});
+        }
+      }
+    }catch(e){  
+      console.log(e)
+      res.json({ status : false, error : "Internal server error." });
+    }
+  });
+}
+
+
+
+

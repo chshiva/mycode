@@ -44,6 +44,9 @@ import { setWorkDashboard } from '../../../Dashboard/UserDashboard/components/Wo
 import WoogeenManager from '../../../Communication/WoogeenManager';
 import { workDashboardData } from '../../../Dashboard/UserDashboard/components/WorkDashboardReducer';
 
+import axios from 'axios';
+
+
 var dataObject = {};
 var deletingIDs = [];
 
@@ -210,7 +213,7 @@ class UploadToTopic extends Component {
   downloadFile(row){
     //console.log(row);
       var link = "/uploads/"+row.fileName;
-      if(row.fileType == 'link') {
+      if(row.fileType == 'link' || row.fileType === 'zip/scorm') {
         return (
           <p><FormattedMessage id ='not_allowed'/></p>
         );            
@@ -498,6 +501,7 @@ class UploadToTopic extends Component {
       });
     }    
   }
+  
   handleUpload = (e) => {
     //console.log(e.target)
     var reader = new FileReader();
@@ -529,6 +533,74 @@ class UploadToTopic extends Component {
       this.saveFile(data);   
     }.bind(this);
     reader.readAsDataURL(file);
+  }
+
+  handleMediaUpload(e) {
+    console.log("e === ", e.target.files[0]);
+
+    var file = e.target.files[0];
+    if (!file){
+      return;
+    } else if (file.size>155000000) {
+      alertify.alert(this.props.intl.messages.warning,this.props.intl.messages.topic_media_file_alert, 
+        function() {
+        }
+      ).setting({'label': this.props.intl.messages.ok});
+      return;
+    }
+    console.log("file size == ", file.size);
+    // this.imageData["file"] = file;
+    // this.imageData["fileName"] = file.name;
+    // this.imageData["fileSize"] = file.size;
+    // this.imageData["fileType"] = file.type.substring(0, file.type.indexOf("/"));
+    // let data = this.imageData;
+    // console.log("data === ", data);
+    // let data = new FormData();
+    // data.append('file', file);
+    // data.append('name', 'some value user types');
+    // data.append('description', 'some value user types');
+    // callfileApi('/samplefileuplaod', 'post', data).then(res => {
+    //   console.log("res == ", res);
+    // });
+    // var formData = new FormData();
+    // formData.append('uploads[]', file, file.name);
+    // console.log("Form Data", formData);
+    // callfileApi('/samplefileuplaod', 'post', formData).then(res => {
+    //   console.log("res == ", res);
+    // });
+    
+
+    const data = new FormData();
+    data.append('file', file);
+    data.append('name', 'some value user types');
+    data.append('description', 'some value user types');
+    let url = '/mediafileupload/' + this.props.params.tid + '/' + this.props.params.rid + '/' + AuthClient.getSession();
+    // '/files' is your node.js route that triggers our middleware
+    let self = this;
+    this.setState({ uploading : true });
+    axios.post(url, data).then((response) => {
+      // do something with the response
+      if (response && response.data && response.data.status) {
+        let resData = response.data;
+        self.getData({
+          currentPage  : self.currentPage,
+          totalItems   : 0,
+          itemsPerPage : self.itemsPerPage,
+          filterType   : self.state.filterValue
+        });
+        self.setState({
+          uploading : false
+        });
+        self.refs.room_container.success(`${resData.message} `, ``);
+        self.props.dispatch(NewFileUpload(resData))
+      } else if (response && response.data) {
+        self.setState({ uploading : false });
+        self.refs.room_container.error(response.data.error);
+      } else {
+        self.setState({ uploading : false });
+        self.refs.room_container.error("Internal server error, Please try again");
+      }
+    });
   }
 
   handleUrlUpload(value) {
@@ -570,7 +642,7 @@ class UploadToTopic extends Component {
     let tpid = this.props.params.tid;
     var pdfLink = "/admin/room/viewpdf/"+row._id+"/"+row.roomId+"/"+row.fileName+"/"+tpid;
     let ext = row.fileName.substr(row.fileName.lastIndexOf(".") + 1);
-    if ((ext == "doc") || (ext == "docx") || (ext == "odt") || (ext == 'xls') || (ext == 'xlsx') || (ext == 'ods') || (ext == 'ppt') || (ext == 'pptx') || (ext == "txt") || (ext == "jpg") || (ext == "png") || (ext == "jpeg") || (ext == "JPEG")) {
+    if ((ext == "doc") || (ext == "docx") || (ext == "odt") || (ext == 'xls') || (ext == 'xlsx') || (ext == 'ods') || (ext == 'ppt') || (ext == 'pptx') || (ext == "txt") /*|| (ext == "jpg") || (ext == "png") || (ext == "jpeg") || (ext == "JPEG")*/) {
       return <Link id="pdfLink" to={pdfLink}><i className="fa fa-file-pdf-o "></i></Link>
     } else {
       return <span><FormattedMessage id ='not_allowed'/></span>
@@ -727,7 +799,7 @@ class UploadToTopic extends Component {
         ];
         var filter = [
           {type : 'search', id:'fileSearch', selectedfilter : this.searchFilter},
-          {type : 'dropdown', id:'fileType', data:[['','all'], ['image','image'], ['zip','zip'], ['audio','audio'], ['video','video']], selectedfilter : this.fileFilter, value:this.state.filterValue}
+          {type : 'dropdown', id:'fileType', data:[['','all'], ['image','image'], ['application', 'document'], ['zip/scorm', 'scorm'], ['zip','zip'], ['audio','audio'], ['video','video'], ['link', 'url']], selectedfilter : this.fileFilter, value:this.state.filterValue}
         ]
 
     const showAddDescriptionModal = this.state.showAddDescriptionModal
@@ -780,7 +852,9 @@ class UploadToTopic extends Component {
               filter={filter}
               listType="Upload"
               handleUpload={this.handleUpload.bind(this)}
+              handleMediaUpload={this.handleMediaUpload.bind(this)}
               handleUrlUpload={this.handleUrlUpload.bind(this)}
+              handleMediaUpload={this.handleMediaUpload.bind(this)}
               urlInputValue={this.state.urlInputValue}
               handleUrlValue={this.handleUrlValue.bind(this)}
               loading = {this.state.loading}

@@ -17,11 +17,15 @@ const feedbackSchema = new mongoose.Schema ({
 		required: true,
 		ref: 'Room'
 	},	
-	feedbacks:
-	{	
-		type: Object,
+	feedbacks: [{
+		question : {	
+		type: Array,
 		required: true,			
-	},	
+		},
+		answer : {
+			type : Array
+		}
+	}],	
 	createdBy: {
 		type: String,
 		required: true,

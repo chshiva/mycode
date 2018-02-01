@@ -104,6 +104,7 @@ export function saveUser(req, res) {
 
 					//Verifying if user has a valid role
 					if ((person.role ==  Roles.Superadmin || (bussinessID == userObject["profile.companyid"] && (person.role == Roles.Admin || person.role == Roles.Lmsadmin || person.role == Roles.Presenteradmin || person.role == Roles.CRMadmin))) && person.role < userObject.role){
+						userObject['uid'] = person._id;
 						createUserCallback(userObject, person.role, function(usererr, userData){
 							if (userData) {
 								res.json({ status: true, data: userData.data, message: userData.message });
@@ -547,7 +548,13 @@ export function newUser(userObject, cb){
 			} else if(doc) {
 
 				//If present send the error
-				cb("Email already exists.", null);
+				if (doc.status == "Registered" || doc.status == "Blocked") {
+					cb("User already exist with this email in inactive mode., ", null);
+				} else if (doc.status == "Deleted") {
+					cb("User already exist with this email in deleted mode., ", null);
+				} else {
+					cb("Email already exists.", null);
+				}
 			} else {
 				const objUser = new Users(userObject);
 
@@ -2599,13 +2606,13 @@ export function changePassword(req, res) {
 						var pwdQuery =  Users.findOne({_id : person._id, token : person.token, password : md5(old_password)});
 						pwdQuery.exec(function(pwderror, pwdsuccess) {
 							if (pwderror || pwdsuccess == null) {
-								res.json({ status: false, error : "Current password you entered is incorrect." });
+								res.json({ status: false, error : "Current password you entered is incorrect.", label : 'oldPassword' });
 							}
 							if (pwdsuccess) {
 								if (userObject.newPassword !== userObject.reNewPassword) {
-									res.json({status :false,error:"Re typed password does not match"});
+									res.json({status :false,error:"Re typed password does not match", label : 'reNewPassword'});
 								} else if (userObject.oldPassword == userObject.reNewPassword){
-									res.json({status :false,error:"New password should be different from old password"});
+									res.json({status :false,error:"New password should be different from old password", label : 'newPassword'});
 								} else {
 									let slashsPassword = addSlash(userObject.reNewPassword);
 
@@ -2690,6 +2697,7 @@ export function resetPassword(req, res) {
 							//Craete or reset password
 							user.save(function(updateerror,result) {
 								if (updateerror) {
+									console.log("updateerror === ", updateerror);
 									res.json({status:false, error:'Can not change password'})
 								} else {		
 									res.json({ status: true, message : "Reset successfully." });

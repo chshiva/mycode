@@ -2,15 +2,15 @@ import { UPDATE_WORKDASHBOARD, UPDATE_WORKQUESTION, CLEAR_WORKDASHBOARD, FETCHED
 
 const initialState = {
   	syncCurrent : '', current : '', topicContent : false,  conductQuestion : false,
-    pdfView : false, handraiseCount : 0, roomCount : 0, handraiseupdates : false,
-    uid : '', roomKey : '', sync : false, ssPdfView : false, ssUploadedby : '', pdfFileName : '', ssNotification : false,
+    pdfView : false, scormView: false, handraiseCount : 0, roomCount : 0, handraiseupdates : false,
+    uid : '', roomKey : '', sync : false, ssPdfView : false, ssUploadedby : '', pdfFileName : '', scormFileName: '', ssNotification : false,
     submissionList : false, pollReports : false, ScreenExtInstalled : false, shareRequestId: '',
     showButtons : true, selfShare : false, roomId: '', roomName: '', whiteBoardData : null, 
     topicList : false, topiclistData: {}, tid: '', topicContentDataDetails :{}, topicFileData: {}, topicPdfFileData: {},
     questionnaireId: '', questionnaireName:'', questionsData: {}, submittedData: {}, answerData: {}, fileId:'', 
     pollContent : false, pollList : true, createPoll : false, pollListData: {}, pollContentData : {}, pollContentIndex : null,
     assignmentContent : false, assignmentData: {}, assignmentList : true, assignmentContentData : {}, assignmentContentIndex : null,
-    showButtons : true, selfShare : false, roomId: '', roomName: '', whiteBoardData : null, filestatus: false, fileData: null, waitforview: false, screenplay: true
+    filestatus: false, fileData: null, waitforview: false, screenplay: true
 };
 
 const WorkDashboardReducer = (state = initialState, action) => {

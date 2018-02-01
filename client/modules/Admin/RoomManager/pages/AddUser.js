@@ -55,6 +55,7 @@ class AddUser extends Component {
     this.submenu.menus[3].action = this.roomConfiguration.bind(this);
     this.submenu.menus[4].action = this.listAssignments.bind(this);
     this.submenu.menus[5].action = this.courseReports.bind(this);
+    this.submenu.menus[6].action = this.listCertificates.bind(this);
 
     this.state = {
         showAddContacts: false,
@@ -176,6 +177,11 @@ class AddUser extends Component {
     var roomId = this.props.params.cid;
     browserHistory.push('/admin/room/attendance/'+roomId);    
   }
+
+  listCertificates = () => {
+    const roomId = this.props.params.cid;
+    browserHistory.push('/admin/room/certificates/'+roomId);
+  }
   
   render() {
     
@@ -194,6 +200,7 @@ class AddUser extends Component {
         this.submenu.menus[4].action = this.roomConfiguration.bind(this);
         this.submenu.menus[5].action = this.listAssignments.bind(this);
         this.submenu.menus[6].action = this.courseReports.bind(this);
+        this.submenu.menus[7].action = this.listCertificates.bind(this);                
       }
     }
     let cls_container = `${styles.iContainer} ${styles.oContainer} pull-right`;

@@ -37,7 +37,7 @@ class ListResults extends Component {
     this.schema = roomTopicSchema;
     this.res = {};
 
-    this.submenu = listResultSubMenu 
+    this.submenu = listResultSubMenu
     this.mainmenu = listResultMainMenu;
     this.getData = this.getData.bind(this);
     //this.clear = this.clear.bind(this);
@@ -153,6 +153,10 @@ class ListResults extends Component {
     var topicId = row.topicId;
     var questionnaireId = row.questionnaireId._id;
     var link = "/admin/room/view-results/"+roomId+'/'+topicId+'/'+questionnaireId+'/'+row._id
+
+    if (row.questionnaireId.questionnaireType === 'scorm') {
+      return (<div> &nbsp;&nbsp;- </div>);
+    }
     return (
       <Link id="questionnaireResult" to={link}><i className="fa fa-eye"></i></Link>
     );
@@ -164,7 +168,7 @@ class ListResults extends Component {
         <span>{row.questionnairePercentage}% </span>
         <span>Grade {row.grade}</span>        
       </div>
-    )    
+    )
   }
 
   render() {

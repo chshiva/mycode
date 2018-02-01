@@ -1887,6 +1887,11 @@ height: 24px; position: absolute; content: '\2714'; display: inline-block; font-
   height: calc(100vh - 0px) !important;
 }
 
+.scormContainer {
+	padding: 10px;
+}
+
+
 /* add this class for share button in conference aside end call */
 /*.shareInviteConf {
 	position: absolute;

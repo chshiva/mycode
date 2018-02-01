@@ -39,6 +39,7 @@ export const roomViewMainMenu = {
 export const roomTopicMainMenu = {
 	menus: [
 			{_id: "btnAdd", text: <FormattedMessage id ="add"/>, actionType: "Function", action: null, icon: "fa fa-plus", role: [Roles.Admin, Roles.Lmsadmin, Roles.Presenteradmin, Roles.Instructor, Roles.Presenter, Roles.Moderator]},
+			{_id: "btnIndex", text: <FormattedMessage id ="index"/>, actionType: "Function", action: null, icon: "fa fa-list-alt", role: [Roles.Admin, Roles.Lmsadmin, Roles.Presenteradmin, Roles.Instructor, Roles.Presenter, Roles.Moderator]},
 		]
 }
 

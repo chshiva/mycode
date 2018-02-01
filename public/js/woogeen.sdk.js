@@ -14,7 +14,7 @@
         "use strict";
         var b = this,
             c = new SignalingChannel;
-        this.onConnected = null, this.onInstaMessage = null, this.onDisconnected = null, this.onConnectFailed = null, this.onChatInvitation = null, this.onChatDenied = null, this.onChatStopped = null, this.onChatAccepted = null, this.onChatSignal = null, this.onStreamType = null, this.onAuthenticated = null, c.onMessage = function(a, c) {
+        this.onConnected = null, this.onInstaMessage = null, this.onDisconnected = null, this.onConnectFailed = null, this.onChatInvitation = null, this.onStatusChanged = null, this.onChatDenied = null, this.onChatStopped = null, this.onChatAccepted = null, this.onChatSignal = null, this.onStreamType = null, this.onAuthenticated = null, c.onMessage = function(a, c) {
             var d = JSON.parse(a);
             switch (d.type) {
                 case "chat-invitation":
@@ -46,7 +46,9 @@
             }
         }, c.onServerDisconnected = function() {
             b.onDisconnected && b.onDisconnected()
-        },c.onInstaMessageReceived = function(data){
+        }, c.onUserStatusChanged = function(data){
+            b.onStatusChanged && b.onStatusChanged(data)
+        }, c.onInstaMessageReceived = function(data){
             b.onInstaMessage && b.onInstaMessage(data)
         }, this.sendChatInvitation = function(a, b, d, e) {
             var f = {
@@ -2534,6 +2536,12 @@
                     type: "server-disconnected"
                 }))
             },
+            KD = function(a){
+                h.dispatchEvent(new d.DataEvent({
+                        type: "status-changed",
+                        data: a
+                }))
+            },
             KDI = function(a){
                 h.dispatchEvent(new d.DataEvent({
                         type: "insta-message",
@@ -2780,7 +2788,7 @@
                 e.Logger.debug(t + ": Remote side needs negotiation."), b && (b.isCaller && "stable" === b.connection.signalingState && b.negotiationState === j.READY ? ja(b) : (b.isNegotiationNeeded = !0, e.Logger.error("Should not receive negotiation needed request because user is callee.")))
             },
             ma = function(a, b, f) {
-                return m !== l.READY ? (e.Logger.warning("Another peer has already connected"), void(f && f(d.Error.P2P_CLIENT_INVALID_STATE))) : (m = l.CONNECTING, q = new c(a), q.onConnected = I, q.onDisconnected = K, q.onInstaMessage = KDI, q.onConnectFailed = J, q.onChatStopped = O, q.onChatAccepted = N, q.onChatDenied = M, q.onChatInvitation = L, q.onChatSignal = P, q.onStreamType = Q, q.onNegotiationNeeded = la, q.onAuthenticated = R, q.onForceDisconnect = S, void q.connect(a, b, f))
+                return m !== l.READY ? (e.Logger.warning("Another peer has already connected"), void(f && f(d.Error.P2P_CLIENT_INVALID_STATE))) : (m = l.CONNECTING, q = new c(a), q.onConnected = I, q.onDisconnected = K, q.onStatusChanged = KD, q.onInstaMessage = KDI, q.onConnectFailed = J, q.onChatStopped = O, q.onChatAccepted = N, q.onChatDenied = M, q.onChatInvitation = L, q.onChatSignal = P, q.onStreamType = Q, q.onNegotiationNeeded = la, q.onAuthenticated = R, q.onForceDisconnect = S, void q.connect(a, b, f))
             },
             na = function(a, b) {
                 return u ? (Ea(), q && q.finalize(), q = null, void(a && a())) : void(b && b(d.Error.P2P_CLIENT_INVALID_STATE))

@@ -141,11 +141,13 @@ function SignalingChannel() {
 
     wsServer.on('online', function(data){
       // console.log("Online", data);
+      // console.log("self online === ", self);
       self.onUserStatusChanged(data);
     });
 
     wsServer.on('offline', function(data){
       // console.log("Offline", data);
+      // console.log("self offline === ", self);
       self.onUserStatusChanged(data);
     });
 

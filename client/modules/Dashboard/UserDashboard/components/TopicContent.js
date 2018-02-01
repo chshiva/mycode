@@ -21,6 +21,7 @@ import { workDashboardReload } from './WorkDashboardReloadReducer';
 import Loading from '../../../App/components/Loading';
 import { loggedInData } from '../../../Login/LoginReducer';
 import { reloadTopicContent } from './WorkDashboardReloadActions';
+import config from '../../../../../server/config';
 
 
 class TopicContent extends Component{
@@ -32,6 +33,8 @@ class TopicContent extends Component{
 		this.state = {
 			showImageModal : false,
 			showAudioModal : false,
+			showScormModal : false,
+			scormId : '',
 			fileName : null,
 			fileType : null,
 			displayName: '',
@@ -53,6 +56,9 @@ class TopicContent extends Component{
       topicId: this.props.workDashboardData.tid
     }
     	this.props.dispatch(getfiles(obj))
+    	this.setState({
+			loading : false
+		});
 		this.props.dispatch(getConferenceTopicContentData(obj)).then(res => this.setResponse(res));
 	}
 
@@ -62,8 +68,12 @@ class TopicContent extends Component{
 	      		roomId:this.props.roomId,
 	      		topicId: this.props.workDashboardData.tid
     		}
-	   		this.props.dispatch(getfiles(obj))
+	   		this.props.dispatch(getfiles(obj));
+	   		this.setState({
+				loading : false
+			});
 			this.props.dispatch(getConferenceTopicContentData(obj)).then(res => this.setResponse(res));
+		
 		}
 
 		if(this.props.workDashboardData.tid != nextProps.workDashboardData.tid) {
@@ -144,7 +154,7 @@ class TopicContent extends Component{
 
   handleTopicList() {
 		this.props.topicListCallback();
-		let obj = {current : 'topicList', topicContent: false, topicList : true, conductQuestion : false, conductQuestion : false, pdfView : false, topicPdfFileData : null, tid:''};
+		let obj = {current : 'topicList', topicContent: false, topicList : true, conductQuestion : false, conductQuestion : false, pdfView : false, scormView: false, topicPdfFileData : null, tid:''};
 		this.handleWorkDashboard(obj);
 	}
 
@@ -155,7 +165,7 @@ class TopicContent extends Component{
 	}
 
 	handleQuestionnaire(data) {
-		let obj = {current : 'topicList', topicContent: false, topicList : false, conductQuestion : true, questionnaireId: data.questionnaireId._id, questionnaireName: data.questionnaireId.questionnaireName,  pdfView : false, topicPdfFileData : null };
+		let obj = {current : 'topicList', topicContent: false, topicList : false, conductQuestion : true, questionnaireId: data.questionnaireId._id, questionnaireName: data.questionnaireId.questionnaireName,  pdfView : false, scormView: false, topicPdfFileData : null };
 		if((data.openFrom == undefined && data.closeFrom == undefined) || (data.openFrom == null && data.closeFrom == null)) {
 			this.handleWorkDashboard(obj);
 		} else {
@@ -235,7 +245,12 @@ class TopicContent extends Component{
 	}
 
 	handlePdfView(data){
-		let obj = { current : 'topicList', topicContent: false, topicList : false, conductQuestion : false, pdfView : true, fileId: data.fileId };
+		let obj = { current : 'topicList', topicContent: false, topicList : false, conductQuestion : false, pdfView : true, scormView: false, fileId: data.fileId };
+		this.handleWorkDashboard(obj);
+	}
+
+	handleScormView(data) {
+		let obj = { current : 'topicList', topicContent: false, topicList : false, conductQuestion : false, pdfView : false, scormView: true, fileId: data.fileId, scormFileName: data.displayName };
 		this.handleWorkDashboard(obj);
 	}
 
@@ -268,75 +283,88 @@ class TopicContent extends Component{
 
 			this.setState({
 				disablePrevBtn : true,
-				disableNextBtn : false
+				disableNextBtn : false,
+				complete: false
 			});
 		} else if(this.topiclistData.length == (currentIndex+1)) {
 			this.setState({
 				disablePrevBtn : false,
-				disableNextBtn : true
+				disableNextBtn : true,
+				complete: false
 			});
 		} else {
 			this.setState({
 				disablePrevBtn : false,
-				disableNextBtn : false
+				disableNextBtn : false,
+				complete: false
 			});
 		}
+
+		var _objAnalytics = new Analytics();
+		let logObj = {
+			topicId: e.target.value,
+			roomId : this.props.roomId
+		}
+
+		_objAnalytics.UpdateLog( logObj );
 	}
 
 	handlePreviousTopic(e) {
 		let currentIndex = this.topiclistData.indexOf(this.props.workDashboardData.tid);
 		let previousIndex = currentIndex - 1;
 
-		// console.log('previousIndex',previousIndex);
-		// if(previousIndex < 0 &&  this.topiclistData.length == 1) {
-		// 	this.setState({
-		// 		disablePrevBtn : true,
-		// 		disableNextBtn : true
-		// 	});
-		// }
-
-
 		if(previousIndex < 0 ) {
 			this.setState({
 				disablePrevBtn : true,
 				disableNextBtn : false,
+				complete: false
 			});
 		} else {
 			this.setState({
 				disablePrevBtn : false,
-				disableNextBtn : false
+				disableNextBtn : false,
+				complete: false
 			});
 			let obj = { tid:this.topiclistData[previousIndex] };
 			this.handleWorkDashboard(obj);
 		}
+
+		var _objAnalytics = new Analytics();
+		let logObj = {
+			topicId: this.topiclistData[previousIndex],
+			roomId : this.props.roomId
+		}
+
+		_objAnalytics.UpdateLog( logObj );
 	}
 
 	handleNextTopic(e) {
 		let currentIndex = this.topiclistData.indexOf(this.props.workDashboardData.tid);
 		let nextIndex = currentIndex + 1;
 
-
-		// console.log('handleNextTopic',nextIndex);
-		// if(nextIndex < 0 &&  this.topiclistData.length == 1) {
-		// 	this.setState({
-		// 		disablePrevBtn : true,
-		// 		disableNextBtn : true
-		// 	});
-		// }
-
 		if( nextIndex >=  this.topiclistData.length) {
 			this.setState({
 				disableNextBtn : true,
-				disablePrevBtn : false
+				disablePrevBtn : false,
+				complete: false
 			});
 		} else {
 			this.setState({
 				disableNextBtn : false,
-				disablePrevBtn : false
+				disablePrevBtn : false,
+				complete: false
 			});
 			let obj = { tid:this.topiclistData[nextIndex]};
 			this.handleWorkDashboard(obj);
 		}
+
+		var _objAnalytics = new Analytics();
+		let logObj = {
+			topicId: this.topiclistData[nextIndex],
+			roomId : this.props.roomId
+		}
+
+		_objAnalytics.UpdateLog( logObj );
 	}
 
 	render() {
@@ -344,8 +372,8 @@ class TopicContent extends Component{
     let cls_areaTabs = `clearfix ${styles.presenterTabs}`;
     let cls_topicAuthor = `clearfix ${styles.topicAuthor}`;
     let cls_topicAuthorGuest = `clearfix ${styles.topicAuthorGuest}`;
-		let cls_authorsBox = `clearfix ${styles.authorsBox}`;
-		let cmnToggle = `${styles.cmnToggle} ${styles.cmnToggleRound}`;
+	let cls_authorsBox = `clearfix ${styles.authorsBox}`;
+	let cmnToggle = `${styles.cmnToggle} ${styles.cmnToggleRound}`;
 
     let topicId = this.props.workDashboardData && this.props.workDashboardData.tid ? this.props.workDashboardData.tid : null;
     let topicLink = '/admin/room/viewtopic/' + topicId + '/' + this.props.roomId
@@ -358,11 +386,29 @@ class TopicContent extends Component{
     	"verticalAlign" : "middle" 
     }
 
+
+
+	let indexTopics = [];
+    let nonIndexTopics= [];
+    if(this.props.workDashboardData && this.props.workDashboardData.topiclistData && this.props.workDashboardData.topiclistData.length > 0) {
+	    this.props.workDashboardData.topiclistData.map((data,i) => {
+	    	if(this.props.workDashboardData && this.props.workDashboardData.topiclistData[i] && this.props.workDashboardData.topiclistData[i].topicIndex){
+	    		indexTopics.push(this.props.workDashboardData.topiclistData[i]);
+	    	} else {
+	    		nonIndexTopics.push(this.props.workDashboardData.topiclistData[i]);
+	    	}
+	    });
+	 }
+
+    let topics = indexTopics.concat(nonIndexTopics);
+
     let topiclistData = [];
 
-	this.props.workDashboardData.topiclistData.forEach(function(data){ 
-		topiclistData.push(data._id);
-	});
+    if(topics && topics.length > 0 ) {
+		topics.forEach(function(data){ 
+			topiclistData.push(data._id);
+		});
+	}
 
 	this.topiclistData = topiclistData;
 
@@ -427,6 +473,123 @@ class TopicContent extends Component{
 
     let name = this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails.createdBy && this.props.workDashboardData.topicContentDataDetails.createdBy.firstname ? this.props.workDashboardData.topicContentDataDetails.createdBy.firstname : '';
     name += this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails.createdBy && this.props.workDashboardData.topicContentDataDetails.createdBy.lastname ? (' '+this.props.workDashboardData.topicContentDataDetails.createdBy.lastname) : '';
+	let mediaFiles = <p>
+					<span><FormattedMessage id = 'no_files_yet'/>...</span>
+					</p>;
+	let zipFiles = [];
+	let scormFiles = [];
+	let pdfFiles = [];
+	let txtFiles = [];
+
+	if (this.props.workDashboardData &&  this.props.workDashboardData.topicFileData && this.props.workDashboardData.topicFileData.length > 0) {
+		mediaFiles = this.props.workDashboardData.topicFileData.map((data) => {
+			var fileType = data.fileType;
+			let fileName = data.fileName;
+		
+			let displayName;
+			if(data.description == undefined) {
+				displayName = data.fileName.substring(data.fileName.indexOf("_") + 1);
+			} else {
+				displayName = data.description
+			}
+			var ext = fileName.split('.').pop()	
+			var path;
+			if(fileType == 'image'){
+				let src = "/uploads/"+fileName;
+				return <li key={data._id}>
+						<Link>
+							<div className={styles.videoThubBox}>
+								<img id="Image" src={src} width="100" height="100" key={fileName} onClick={this.handleImage.bind(this,{fileName, displayName},{fileType})} title={displayName}/>
+							</div>
+						</Link>
+						<label title={displayName}>{displayName}</label>
+					</li>
+			} else if(fileType == 'video'){
+				let src = "/uploads/"+fileName;
+				return <li key={data._id}>
+						<Link>
+							<div className={styles.videoThubBox}>
+								<video id="video" src ={src} width="100" height="100" style={video} key={fileName} onClick={this.handleImage.bind(this,{fileName, displayName},{fileType})} title={displayName}/>
+							</div>
+						</Link>
+						<label title={displayName}>{displayName}</label>
+					</li>
+			} else if (fileType == 'audio'){
+				//let src = "/uploads/"+fileName;
+				return <li key={data._id}>
+						<Link>
+							<div className={styles.videoThubBox}>
+								<img id="audioImage" src ="/images/black-icons/audio-file.png" key={fileName} onClick={this.handleAudioImage.bind(this,{fileName, displayName},{fileType})} title={displayName}/>
+							</div>
+						</Link>
+						<label title={displayName}>{displayName}</label>
+					</li>
+			} else if(fileType == 'link'){
+				let src = "http://img.youtube.com/vi/"+data.fileName+"/1.jpg";
+				let fullName = data.title ? data.title : 'No Name';
+				let title = fullName.length > 30 ? (fullName.substring(0, 30) + '...') : fullName;
+				return <li key={data._id}>
+						<Link>
+							<div className={styles.videoThubBox}>
+								<div className={styles.timeDisplay}><p>{data.duration ? moment.duration(data.duration).minutes()+":"+moment.duration(data.duration).seconds() : null}</p></div>
+								<img id="image" src={src} width="100" height="100" key={fileName} onClick={this.handleImage.bind(this,{fileName},{fileType})} title={fullName}/>
+							</div>
+						</Link>
+						<label title={title}>{title}</label>
+					</li>
+			} else if (fileType == 'zip/scorm') {
+				let fullName = displayName.split('.')[0] ? displayName.split('.')[0] : 'No Name';
+				let title = fullName.length > 30 ? (fullName.substring(0, 30) + '...') : fullName;
+				scormFiles.push(<li key={data._id} style={{display : "block"}}>
+					<Link id="scormView" className={styles.fileUploadBreakWord} onClick={this.handleScormView.bind(this, {fileId: data._id, fileName, displayName})} title={fullName}>
+					<img src="/images/icons/scorm.png" />
+						<span>{displayName.split('.')[0]}</span>
+					</Link>
+				</li>)
+				return null;
+			} else if (fileType == 'zip') {
+				let link = config.domin + "/uploads/"+data.fileName;
+				// let link = "/uploads/"+data.fileName;
+				let src = "/images/icons/"+ext+".png" 
+				let title = displayName.length > 30 ? (displayName.substring(0, 30) + '...') : displayName;
+				zipFiles.push(<li key={data._id}>
+					<a href={link} id="zipView" className={styles.fileUploadBreakWord} title={displayName}>
+					<img src={src} />
+					<span>{title}</span>
+					</a>
+				</li>);
+				return null;
+			} else if(fileType == 'application') {
+				let link = "/uploads/"+data.fileName
+				let src = "/images/icons/"+ext+".png" 
+				pdfFiles.push(<li key={data._id} >
+					<Link id="pdfView" className={styles.fileUploadBreakWord} onClick={this.handlePdfView.bind(this, {fileId: data._id, fileName, displayName})}>
+						<img src={src} />
+						<span>{displayName}</span>
+					</Link>
+				</li>);
+				return null;
+			} else if(fileType == 'text') {
+				let link = "/uploads/"+data.fileName
+				let src = "/images/icons/"+ext+".png" 
+				txtFiles.push(<li key={data._id} >
+					<Link id="pdfView" className={styles.fileUploadBreakWord} onClick={this.handlePdfView.bind(this, {fileId: data._id, fileName, displayName})}>
+						<img src={src} />
+						<span>{displayName}</span>
+					</Link>
+				</li>)
+				return null;
+			}
+	
+			// else {
+			// 	return <p key={data._id}>
+			//      <span>No Files Yet!...</span>
+			//    </p>
+			// }
+		})
+	}
+	
+
 
     if (this.state.loading) {
 			return (
@@ -444,62 +607,64 @@ class TopicContent extends Component{
 								<li><span>/</span></li>
 								<li><span title={this.props.workDashboardData.topicContentDataDetails.topicName}>{this.props.workDashboardData.topicContentDataDetails.topicName.length > 20 ? (this.props.workDashboardData.topicContentDataDetails.topicName.substring(0, 20) + '...') : this.props.workDashboardData.topicContentDataDetails.topicName}</span></li>
 							</ul>
-				      {
-				      	this.props.role == Roles.Lmsadmin || this.props.role == Roles.Instructor
-				      	?
-					      <div className={styles.absoluteRightActionBlock}>
-				          <ul>
-				            <li>
-					            <Link id="manageTopic" to={topicLink} title={this.props.intl.messages.add_topics} >
-					              <div className={styles.iconBox}>
-					                <img src="/images/black-icons/black-topics.png"  alt="manage-topics-icon"/>
-					              </div>
-					            </Link>
-				          	</li>
-				          	<li>
-				              <Link id="manageQuestionnaire" to={questionnaireLink} title={this.props.intl.messages.manage_questionnaire}>
-				                <div className={styles.iconBox}>
-				                  <img src="/images/black-icons/black-questionnaire.png"  alt="manage-questionnaire-icon"/>
-				                </div>
-				              </Link>
-				            </li>
-				          	<li>
-				              <Link id="manageAssignments" to={assignmentLink} title={this.props.intl.messages.manage_assignments}>
-				                <div className={styles.iconBox}>
-				                  <img src="/images/black-icons/black-assignments.png"  alt="manage-assignments-icon"/>
-				                </div>
-				              </Link>
-				            </li>
-				          </ul>
-				        </div>
-				        : null
-				      }
+				      		{
+						      	this.props.role == Roles.Lmsadmin || this.props.role == Roles.Instructor
+						      	?
+							    	<div className={styles.absoluteRightActionBlock}>
+							          	<ul>
+								            <li>
+									            <Link id="manageTopic" to={topicLink} title={this.props.intl.messages.add_topics} >
+									              <div className={styles.iconBox}>
+									                <img src="/images/black-icons/black-topics.png"  alt="manage-topics-icon"/>
+									              </div>
+									            </Link>
+								          	</li>
+								          	<li>
+								              <Link id="manageQuestionnaire" to={questionnaireLink} title={this.props.intl.messages.manage_questionnaire}>
+								                <div className={styles.iconBox}>
+								                  <img src="/images/black-icons/black-questionnaire.png"  alt="manage-questionnaire-icon"/>
+								                </div>
+								              </Link>
+								            </li>
+								          	<li>
+								              <Link id="manageAssignments" to={assignmentLink} title={this.props.intl.messages.manage_assignments}>
+								                <div className={styles.iconBox}>
+								                  <img src="/images/black-icons/black-assignments.png"  alt="manage-assignments-icon"/>
+								                </div>
+								              </Link>
+								            </li>
+							          	</ul>
+						        	</div>
+						        : null
+						     }
 						</div>
-					<div className={styles.topicListBar}>
-				 		<div className={styles.dropdownBar}>
-				 			<div className={styles.pastTopic}>
-					 			<button disabled={this.state.disablePrevBtn} onClick = {this.handlePreviousTopic.bind(this)}>
-					 				<FontAwesome  className={styles.faIcons} name="chevron-left" size="lg" style={this.state.disablePrevBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } }/>
-								</button>
+						<div className={styles.topicListBar}>
+					 		<div className={styles.dropdownBar}>
+					 			<div className={styles.pastTopic}>
+						 			<button disabled={this.state.disablePrevBtn} onClick = {this.handlePreviousTopic.bind(this)}>
+						 				<FontAwesome  className={styles.faIcons} name="chevron-left" size="lg" style={this.state.disablePrevBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } }/>
+									</button>
+						 		</div>
+					 			<div className={styles.dropdownList}>
+					 				<div className={styles.selectStyle}>
+					 					<select onChange={this.handleTopicChange.bind(this)} value={this.props.workDashboardData.tid}>
+										  	{
+					                  			topics.map((data,i)=> {
+					                  				let index =data.topicIndex ? data.topicIndex : null;
+					                  				let dot   = data.topicIndex ? "." : null;
+					                   				return (<option key={i} value={data._id} >{index}{dot} {data. topicName} </option>)
+					                  			})
+			                 	 			}
+			                 	 		</select>
+									</div>
+					 			</div>
+					 			<div className={styles.nextTopic}>
+						 			<button disabled={this.state.disableNextBtn}  onClick = {this.handleNextTopic.bind(this)}>
+						 				<FontAwesome  style={this.state.disableNextBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } } className={styles.faIcons} name="chevron-right" size="lg" />
+									</button>
+					 			</div>
 					 		</div>
-				 			<div className={styles.dropdownList}>
-				 				<div className={styles.selectStyle}>
-				 					<select onChange={this.handleTopicChange.bind(this)} value={this.props.workDashboardData.tid}>
-									  	{
-				                  			this.props.workDashboardData.topiclistData.map((data,i)=> {
-				                   				return (<option key={i} value={data._id} > {data. topicName} </option>)
-				                  			})
-		                 	 			}
-		                 	 		</select>
-								</div>
-				 			</div>
-				 			<div className={styles.nextTopic}>
-					 			<button disabled={this.state.disableNextBtn}  onClick = {this.handleNextTopic.bind(this)}>
-					 				<FontAwesome  style={this.state.disableNextBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } } className={styles.faIcons} name="chevron-right" size="lg" />
-								</button>
-				 			</div>
 				 		</div>
-			 		</div>
 
 						<div className={styles.topicViewheader}>
 							<h1 className={styles.mainHeadingTxt}>{this.props.workDashboardData.topicContentDataDetails.topicName}</h1>
@@ -533,218 +698,283 @@ class TopicContent extends Component{
 							<div className={styles.fullDottedBlock}>
 								<h2><FormattedMessage id = 'media_resources'/></h2>
 								<div className={styles.mediaListBlock}>
-								<ul>
-								{
-									this.props.workDashboardData &&  this.props.workDashboardData.topicFileData && this.props.workDashboardData.topicFileData.length > 0
-									?
-									this.props.workDashboardData.topicFileData.map((data) => {
-										var fileType = data.fileType;
-										let fileName = data.fileName;
-										let displayName;
-										if(data.description == undefined) {
-											displayName = data.fileName.substring(data.fileName.indexOf("_") + 1);
-										} else {
-											displayName = data.description
-										}
-										if(fileType == 'image'){
-											let src = "/uploads/"+fileName;
-											return <li key={data._id}>
-													<Link>
-														<div className={styles.videoThubBox}>
-															<img id="Image" src={src} width="100" height="100" key={fileName} onClick={this.handleImage.bind(this,{fileName, displayName},{fileType})} title={displayName}/>
-														</div>
-													</Link>
-													<label title={displayName}>{displayName}</label>
-												</li>
-										}	else if(fileType == 'video'){
-											let src = "/uploads/"+fileName;
-											return <li key={data._id}>
-													<Link>
-														<div className={styles.videoThubBox}>
-															<video id="video" src ={src} width="100" height="100" style={video} key={fileName} onClick={this.handleImage.bind(this,{fileName, displayName},{fileType})} title={displayName}/>
-														</div>
-													</Link>
-													<label title={displayName}>{displayName}</label>
-												</li>
-										} else if (fileType == 'audio'){
-											//let src = "/uploads/"+fileName;
-											return <li key={data._id}>
-													<Link>
-														<div className={styles.videoThubBox}>
-															<img id="audioImage" src ="/images/black-icons/audio-file.png" key={fileName} onClick={this.handleAudioImage.bind(this,{fileName, displayName},{fileType})} title={displayName}/>
-														</div>
-													</Link>
-													<label title={displayName}>{displayName}</label>
-												</li>
-										} else if(fileType == 'link'){
-											let src = "http://img.youtube.com/vi/"+data.fileName+"/1.jpg";
-											let title = data.title ? data.title : 'No Name';
-											return <li key={data._id}>
-													<Link>
-														<div className={styles.videoThubBox}>
-															<div className={styles.timeDisplay}><p>{data.duration ? moment.duration(data.duration).minutes()+":"+moment.duration(data.duration).seconds() : null}</p></div>
-															<img id="image" src={src} width="100" height="100" key={fileName} onClick={this.handleImage.bind(this,{fileName},{fileType})} title={title}/>
-														</div>
-													</Link>
-													<label title={title}>{title}</label>
-												</li>
-										}
-
-										// else {
-										// 	return <p key={data._id}>
-										//      <span>No Files Yet!...</span>
-										//    </p>
-										// }
-									}) : <p>
-										<span><FormattedMessage id = 'no_files_yet'/>...</span>
-										</p>
-								}
-							</ul>
-						</div>
-					</div>
-					<div className={styles.fullDottedBlock}>
-						<h2><FormattedMessage id = 'documents'/></h2>
-						<div className={styles.resourceList}>
-							<ul>
-								{
-									this.props.workDashboardData && this.props.workDashboardData.topicFileData && this.props.workDashboardData.topicFileData.length > 0
-								?
-									this.props.workDashboardData.topicFileData.map((data) => {
-										var fileName = data.fileName
-										let displayName;
-										if(data.description == undefined) {
-											displayName = data.fileName.substring(data.fileName.indexOf("_") + 1);
-										} else {
-											displayName = data.description
-										}
-										var fileType = data.fileType
-										var ext = fileName.split('.').pop()	
-										var path;
-										if(fileType == 'application') {
-											let link = "/uploads/"+data.fileName
-											let src = "/images/icons/"+ext+".png" 
-											return <li key={data._id} >
-												<Link id="pdfView" className={styles.fileUploadBreakWord} onClick={this.handlePdfView.bind(this, {fileId: data._id, fileName, displayName})}>
-													<img src={src} />
-													<span>{displayName}</span>
-												</Link>
-											</li>
-										}else	if(fileType == 'text') {
-											let link = "/uploads/"+data.fileName
-											let src = "/images/icons/"+ext+".png" 
-											return <li key={data._id} >
-												<Link id="pdfView" className={styles.fileUploadBreakWord} onClick={this.handlePdfView.bind(this, {fileId: data._id, fileName, displayName})}>
-													<img src={src} />
-													<span>{displayName}</span>
-												</Link>
-											</li>
-										}
-										// else {
-										// 	return <p key={data._id}>
-										//      <span><FormattedMessage id = 'no_files_yet'/>...</span>
-										//    </p>
-										// }
-									}) 
-								: <li>
-										<p>
-											<span><FormattedMessage id = 'no_files_yet'/>...</span>
-										</p>
-									</li>
-								}
-							</ul>
-						</div>
-					</div>
-					{/*	      <div className={styles.fullDottedBlock}>
-					<h2>SCOM Files</h2>
-					<div className={styles.resourceList}>
-					<ul>
-					{
-					this.props.dashboardData.uploadData.length > 0
-					?
-					this.props.dashboardData.uploadData.map((data) => {
-					var fileType = data.fileType	
-					if(fileType == 'zip') {
-					return <li key={data._id}>
-					<Link>
-					<span>{data.fileName}</span>
-					</Link>
-					</li>
-					} 
-					// else {
-					// 	return <p key={data._id}>
-					//      <span>No Files Yet!...</span>
-					//    </p>
-					// }
-					}) : <li>
-					<p>
-					<span>No Files Yet!...</span>
-					</p>
-					</li>
-					}
-					</ul>
-					</div>
-					</div>*/}
-					<div className={styles.fullDottedBlock}>
-						<h2><FormattedMessage id = 'questionnaires'/></h2>
-						<div className={styles.resourceList}>
-							<ul>
-								{
-									this.props.workDashboardData && this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails.questionnaire && this.props.workDashboardData.topicContentDataDetails.questionnaire.length > 0
-								?
-									this.props.workDashboardData.topicContentDataDetails.questionnaire.map((data) => {
-										return <li key={data._id}>
-											<Link id="questionnaire" onClick={this.handleQuestionnaire.bind(this, data)}>
-												<div>
-													<span className={styles.questionCircleSmall}>?</span>
-													<span>{data.questionnaireId.questionnaireName}</span>
-												</div>
-												{
-													((data.openFrom == undefined && data.closeFrom == undefined) || (data.openFrom == null && data.closeFrom == null))
-													?
-													<div className={styles.dateTimeBlock}>
-														<span className={styles.dateTime}> <span><FormattedMessage id = 'no_time_limitations'/></span> </span>
-													</div>
-													: <div className={styles.dateTimeBlock}>
-														<span className={styles.dateTime}> <span><FormattedMessage id = 'start_time'/>: &nbsp; </span> <span><FontAwesome name="calendar"> </FontAwesome> {moment(data.openFrom).format("DD/MM/YYYY")}</span> <span className={styles.timeMrg}> <FontAwesome name="clock-o"> </FontAwesome> {moment(data.openFrom).format("hh:mm A")}</span> </span>
-														<span className={styles.dateTime}> <span><FormattedMessage id = 'end_time'/>: &nbsp; </span> <span><FontAwesome name="calendar"> </FontAwesome> {moment(data.closeFrom).format("DD/MM/YYYY")}</span> <span className={styles.timeMrg}> <FontAwesome name="clock-o"> </FontAwesome> {moment(data.closeFrom).format("hh:mm A")}</span> </span>
-													</div>
-												}
-											</Link>
-										</li>
-									}) 
-								: <p>
-										<span><FormattedMessage id ='no_questionnaires_yet'/>...</span>
-									</p>
-								}
-							</ul>
-						</div>
-					</div>
-					{
-						(this.props.loggedInData && this.props.loggedInData.data && this.props.loggedInData.data.profile && this.props.loggedInData.data.profile.companyid && this.props.loggedInData.data.profile.companyid.businessType && this.props.loggedInData.data.profile.companyid.businessType == 'LMS')  && 
-						(this.props.workDashboardData && this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails._id)
-						?				
-						<div className={styles.topicCompleteDiv}>
-							<div className={styles.checkboxDiv}>
-								<span className={styles.checkboxText}> 
-									<FormattedMessage id ='i_have_completed_this_topic'/>
-								</span>		
-								<span className={cls_optionBlock}>
-									<label>
-										<input type="checkbox" id="switchCheckbox" className={cls_settingsOptions} name="onOffSwitch"  
-										value={this.state.complete} onClick={this.handleMarkComplete.bind(this)}
-										checked={this.state.complete} />
-									</label>                
-								</span>
-							
+									<ul>
+										{mediaFiles}
+									</ul>
+								</div>
 							</div>
+							<div className={styles.fullDottedBlock}>
+								<h2><FormattedMessage id = 'scorm_content'/></h2>
+								{scormFiles && scormFiles.length > 0 ?
+									<div className={styles.resourceList}>
+										<ul>
+											{scormFiles}
+										</ul>
+									</div>
+								:<p>
+									<span><FormattedMessage id = 'no_files_yet'/>...</span>
+								</p>
+								}
+							</div>
+							<div className={styles.fullDottedBlock}>
+								<h2><FormattedMessage id = 'documents'/></h2>
+								<div className={styles.resourceList}>
+									<ul>
+										{/*
+											this.props.workDashboardData && this.props.workDashboardData.topicFileData && this.props.workDashboardData.topicFileData.length > 0
+										?
+											this.props.workDashboardData.topicFileData.map((data) => {
+												var fileName = data.fileName
+												let displayName;
+												if(data.description == undefined) {
+													displayName = data.fileName.substring(data.fileName.indexOf("_") + 1);
+												} else {
+													displayName = data.description
+												}
+												var fileType = data.fileType
+												var ext = fileName.split('.').pop()	
+												var path;
+												if(fileType == 'application') {
+													let link = "/uploads/"+data.fileName
+													let src = "/images/icons/"+ext+".png" 
+													return <li key={data._id} >
+														<Link id="pdfView" className={styles.fileUploadBreakWord} onClick={this.handlePdfView.bind(this, {fileId: data._id, fileName, displayName})}>
+															<img src={src} />
+															<span>{displayName}</span>
+														</Link>
+													</li>
+												}else	if(fileType == 'text') {
+													let link = "/uploads/"+data.fileName
+													let src = "/images/icons/"+ext+".png" 
+													return <li key={data._id} >
+														<Link id="pdfView" className={styles.fileUploadBreakWord} onClick={this.handlePdfView.bind(this, {fileId: data._id, fileName, displayName})}>
+															<img src={src} />
+															<span>{displayName}</span>
+														</Link>
+													</li>
+												}
+												// else {
+												// 	return <p key={data._id}>
+												//      <span><FormattedMessage id = 'no_files_yet'/>...</span>
+												//    </p>
+												// }
+											}) 
+										: <li>
+												<p>
+													<span><FormattedMessage id = 'no_files_yet'/>...</span>
+												</p>
+											</li>
+										*/}
+										{pdfFiles && pdfFiles.length > 0 ?
+											pdfFiles
+										: null}
+										{txtFiles && txtFiles.length > 0 ?
+											txtFiles
+										: null}
+										{zipFiles && zipFiles.length > 0 ?
+											zipFiles
+										: null}
+										
+										{!txtFiles && txtFiles.length <= 0 && !pdfFiles && pdfFiles.length <= 0 && !zipFiles && zipFiles.length <= 0 ?
+											<li>
+												<p>
+													<span><FormattedMessage id = 'no_files_yet'/>...</span>
+												</p>
+											</li>
+										: null}
+									</ul>
+								</div>
+							</div>
+							{/*	      <div className={styles.fullDottedBlock}>
+							<h2>SCOM Files</h2>
+							<div className={styles.resourceList}>
+							<ul>
+							{
+							this.props.dashboardData.uploadData.length > 0
+							?
+							this.props.dashboardData.uploadData.map((data) => {
+							var fileType = data.fileType	
+							if(fileType == 'zip') {
+							return <li key={data._id}>
+							<Link>
+							<span>{data.fileName}</span>
+							</Link>
+							</li>
+							} 
+							// else {
+							// 	return <p key={data._id}>
+							//      <span>No Files Yet!...</span>
+							//    </p>
+							// }
+							}) : <li>
+							<p>
+							<span>No Files Yet!...</span>
+							</p>
+							</li>
+							}
+							</ul>
+							</div>
+							</div>*/}
+							<div className={styles.fullDottedBlock}>
+								<h2><FormattedMessage id = 'questionnaires'/></h2>
+								<div className={styles.resourceList}>
+									<ul>
+										{
+											this.props.workDashboardData && this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails.questionnaire && this.props.workDashboardData.topicContentDataDetails.questionnaire.length > 0
+										?
+											this.props.workDashboardData.topicContentDataDetails.questionnaire.map((data) => {
+												return <li key={data._id}>
+													<Link id="questionnaire" onClick={this.handleQuestionnaire.bind(this, data)}>
+														<div>
+															<span className={styles.questionCircleSmall}>?</span>
+															<span>{data.questionnaireId.questionnaireName}</span>
+														</div>
+														{
+															((data.openFrom == undefined && data.closeFrom == undefined) || (data.openFrom == null && data.closeFrom == null))
+															?
+															<div className={styles.dateTimeBlock}>
+																<span className={styles.dateTime}> <span><FormattedMessage id = 'no_time_limitations'/></span> </span>
+															</div>
+															: <div className={styles.dateTimeBlock}>
+																<span className={styles.dateTime}> <span><FormattedMessage id = 'start_time'/>: &nbsp; </span> <span><FontAwesome name="calendar"> </FontAwesome> {moment(data.openFrom).format("DD/MM/YYYY")}</span> <span className={styles.timeMrg}> <FontAwesome name="clock-o"> </FontAwesome> {moment(data.openFrom).format("hh:mm A")}</span> </span>
+																<span className={styles.dateTime}> <span><FormattedMessage id = 'end_time'/>: &nbsp; </span> <span><FontAwesome name="calendar"> </FontAwesome> {moment(data.closeFrom).format("DD/MM/YYYY")}</span> <span className={styles.timeMrg}> <FontAwesome name="clock-o"> </FontAwesome> {moment(data.closeFrom).format("hh:mm A")}</span> </span>
+															</div>
+														}
+													</Link>
+												</li>
+											}) 
+										: <p>
+												<span><FormattedMessage id ='no_questionnaires_yet'/>...</span>
+											</p>
+										}
+									</ul>
+								</div>
+							</div>
+							{
+								(this.props.loggedInData && this.props.loggedInData.data && this.props.loggedInData.data.profile && this.props.loggedInData.data.profile.companyid && this.props.loggedInData.data.profile.companyid.businessType && this.props.loggedInData.data.profile.companyid.businessType == 'LMS')  && 
+								(this.props.workDashboardData && this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails._id)
+								?				
+								<div className={styles.topicCompleteDiv}>
+									<div className={styles.checkboxDiv}>
+										<span className={styles.checkboxText}> 
+											<FormattedMessage id ='i_have_completed_this_topic'/>
+										</span>		
+										<span className={cls_optionBlock}>
+											<label>
+												<input type="checkbox" id="switchCheckbox" className={cls_settingsOptions} name="onOffSwitch"  
+												value={this.state.complete} onClick={this.handleMarkComplete.bind(this)}
+												checked={this.state.complete} />
+											</label>                
+										</span>
+									
+									</div>
+								</div>
+								:null
+							}
+							<div className={styles.topicListBar}>
+						 		<div className={styles.dropdownBar}>
+						 			<div className={styles.pastTopic}>
+							 			<button type="button" disabled={this.state.disablePrevBtn} onClick = {this.handlePreviousTopic.bind(this)}> 
+							 				<FontAwesome className={styles.faIcons} name="chevron-left" size="lg" style={this.state.disablePrevBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } } />
+										</button>
+							 		</div>
+						 			<div className={styles.dropdownList}>
+						 				<div className={styles.selectStyle}>
+						 					<select onChange={this.handleTopicChange.bind(this)} value={this.props.workDashboardData.tid}>
+											  	{
+						                  			topics.map((data,i)=> {
+						                   				let index =data.topicIndex ? data.topicIndex : null;
+						                  				let dot   = data.topicIndex ? "." : null;
+						                   				return (<option key={i} value={data._id} >{index}{dot} {data. topicName} </option>)
+						                  			})
+				                 	 			}
+				                 	 		</select>
+										</div>
+						 			</div>
+						 			<div className={styles.nextTopic}>
+							 			<button  type="button" disabled={this.state.disableNextBtn }  onClick = {this.handleNextTopic.bind(this)}>
+							 				<FontAwesome className={styles.faIcons} name="chevron-right" size="lg" style={this.state.disableNextBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } } />
+										</button>
+						 			</div>
+						 		</div>
+					 		</div>
 						</div>
-						:null
-					}
+
+						{/*<div className={styles.topicsListFooter}>
+							{
+								this.props.workDashboardData && this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails._id
+									?
+										
+										<div className={styles.onOffSwitch}>
+									    <input id="switchCheckbox" type="checkbox" name="onOffSwitch" className={styles.onOffSwitchCheckbox} id="myonOffSwitch" value={this.state.complete} onChange={this.handleMarkComplete.bind(this)} checked={!this.state.complete} />
+									    <label className={styles.onOffSwitchLabel} htmlFor="myonOffSwitch">
+									        <span className={styles.onOffSwitchInner}></span>
+									        <span className={styles.onOffSwitchSwitch}></span>
+									    </label>
+									</div>
+							
+										
+													
+									: null
+							}
+						</div>*/}			
+					</div>
+		      		{showImageModal}
+					{showAudioModal}
+	      		</div>
+			)
+	} else {
+		return(
+			<div>
+				<div className={styles.whiteCard}>
+					<div className={styles.breadCrum}>
+						<ul>
+							<li>
+								<Link><span>{this.props.roomName}</span></Link>
+							</li>
+							<li><span>/</span></li>
+							<li>
+								<Link id="topicList" onClick={this.handleTopicList.bind(this)}><span><FormattedMessage id ="topics_list"/></span></Link>
+							</li>
+							<li><span>/</span></li>
+							<li><span title={this.props.workDashboardData.topicContentDataDetails.topicName}>{this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails.topicName && this.props.workDashboardData.topicContentDataDetails.topicName.length > 20 ? (this.props.workDashboardData.topicContentDataDetails.topicName.substring(0, 20) + '...') : this.props.workDashboardData.topicContentDataDetails.topicName || '...'}</span></li>
+						</ul>
+			      		{
+					      	this.props.role == Roles.Lmsadmin || this.props.role == Roles.Instructor
+					      	?
+						    	<div className={styles.absoluteRightActionBlock}>
+						          	<ul>
+							            <li>
+								            <Link id="manageTopic" to={topicLink} title={this.props.intl.messages.add_topics} >
+								              <div className={styles.iconBox}>
+								                <img src="/images/black-icons/black-topics.png"  alt="manage-topics-icon"/>
+								              </div>
+								            </Link>
+							          	</li>
+							          	<li>
+							              <Link id="manageQuestionnaire" to={questionnaireLink} title={this.props.intl.messages.manage_questionnaire}>
+							                <div className={styles.iconBox}>
+							                  <img src="/images/black-icons/black-questionnaire.png"  alt="manage-questionnaire-icon"/>
+							                </div>
+							              </Link>
+							            </li>
+							          	<li>
+							              <Link id="manageAssignments" to={assignmentLink} title={this.props.intl.messages.manage_assignments}>
+							                <div className={styles.iconBox}>
+							                  <img src="/images/black-icons/black-assignments.png"  alt="manage-assignments-icon"/>
+							                </div>
+							              </Link>
+							            </li>
+						          	</ul>
+					        	</div>
+					        : null
+					     }
+					</div>
 					<div className={styles.topicListBar}>
 				 		<div className={styles.dropdownBar}>
 				 			<div className={styles.pastTopic}>
-					 			<button type="button" disabled={this.state.disablePrevBtn} onClick = {this.handlePreviousTopic.bind(this)}> 
-					 				<FontAwesome className={styles.faIcons} name="chevron-left" size="lg" style={this.state.disablePrevBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } } />
+					 			<button disabled={this.state.disablePrevBtn} onClick = {this.handlePreviousTopic.bind(this)}>
+					 				<FontAwesome  className={styles.faIcons} name="chevron-left" size="lg" style={this.state.disablePrevBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } }/>
 								</button>
 					 		</div>
 				 			<div className={styles.dropdownList}>
@@ -759,43 +989,15 @@ class TopicContent extends Component{
 								</div>
 				 			</div>
 				 			<div className={styles.nextTopic}>
-					 			<button  type="button" disabled={this.state.disableNextBtn }  onClick = {this.handleNextTopic.bind(this)}>
-					 				<FontAwesome className={styles.faIcons} name="chevron-right" size="lg" style={this.state.disableNextBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } } />
+					 			<button disabled={this.state.disableNextBtn}  onClick = {this.handleNextTopic.bind(this)}>
+					 				<FontAwesome  style={this.state.disableNextBtn== true ? {cursor: "not-allowed",color:"rgba(0,0,0,0.28)"} : {cursor: "pointer", color: "rgba(0,0,0,0.54)" } } className={styles.faIcons} name="chevron-right" size="lg" />
 								</button>
 				 			</div>
 				 		</div>
 			 		</div>
-				</div>
-								
-					
-
-
-				{/*<div className={styles.topicsListFooter}>
-					{
-						this.props.workDashboardData && this.props.workDashboardData.topicContentDataDetails && this.props.workDashboardData.topicContentDataDetails._id
-							?
-								
-								<div className={styles.onOffSwitch}>
-							    <input id="switchCheckbox" type="checkbox" name="onOffSwitch" className={styles.onOffSwitchCheckbox} id="myonOffSwitch" value={this.state.complete} onChange={this.handleMarkComplete.bind(this)} checked={!this.state.complete} />
-							    <label className={styles.onOffSwitchLabel} htmlFor="myonOffSwitch">
-							        <span className={styles.onOffSwitchInner}></span>
-							        <span className={styles.onOffSwitchSwitch}></span>
-							    </label>
-							</div>
-					
-								
-											
-							: null
-					}
-				</div>*/}			
-			</div>
-		      		{showImageModal}
-		      		{showAudioModal}
-	      		</div>
-			)
-		} else {
-			return(
-			<Loading loadType = "list"/> 
+			 		<Loading loadType = "list"/> 
+			 	</div>
+		 	</div>
 			)
 		}
 	} 

@@ -71,7 +71,7 @@ class ViewLocale extends Component {
         <div className={cls_isubmenu}>
           <SubMenu data={submenu} />
         </div>
-        <LocaleView profileData={this.props.loggedInData.data}/>
+        <LocaleView profileData={this.props.loggedInData.data} locale={this.props.intlData.locale}/>
       </div>
     );
   }

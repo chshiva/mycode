@@ -16,6 +16,9 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import ccavReqHandler from './paymentgateway/ccavRequestHandler';
 import ccavResHandler from './paymentgateway/ccavResponseHandler';
+
+var formidable = require('formidable');
+var fs = require('fs');
 // Initialize the Express App
 const app = new Express({ strict: true });
 /*app.set('views', __dirname + '/public');
@@ -44,7 +47,7 @@ import adminRoute from './routes/admin.routes';
 import logRoute from './routes/logger.routes';
 import apiRoute from './routes/api.routes';
 import { authCheck } from './controllers/login.controller.js';
-import defaultUser from './defaultUser.js'
+import defaultUser from './defaultUser.js';
 import serverConfig from './config';
 import fileUploadRoute from './routes/fileupload.routes';
 import paymentRoute from './routes/payment.routes';
@@ -57,6 +60,9 @@ import registration from './routes/registration.routes';
 import fullCalendar from './routes/calendar.routes';
 
 import {confRoute, confGeneral} from './routes/conf.routes';
+import { mediaFileUplaod } from './controllers/fileupload.controller';
+ 
+import scormRoute from './routes/scorm.routes';
 
 var tokens = require('csrf-tokens')()
 var cookieParser = require('cookie-parser')
@@ -76,7 +82,7 @@ mongoose.connect(serverConfig.mongoURL, (error) => {
 
   // feed some dummy data in DB.
   // dummyData();
-  defaultUser();
+  defaultUser()
 });
 
 var secret = tokens.secretSync()
@@ -146,7 +152,9 @@ app.post('/initialpurchase', bodyParser.json({}), bodyParser.urlencoded({extende
 // app.get('/conf/:rid', bodyParser.json({}),bodyParser.urlencoded({extended: true}), confRoute);
 
 //app.post('/fetchToken', bodyParser.json({}), bodyParser.urlencoded({extended: true}), confRoute /*function(req, res) { console.log(req.body); }*/);
-app.use('/api',bodyParser.json({ limit: '200mb' }), [login, adminRoute, fileUploadRoute, userDashboardRoute, confRoute, schedule, contacts, registration, logRoute, fullCalendar,reports]);
+app.post('/mediafileupload/:topicId/:roomId/:token', mediaFileUplaod);
+
+app.use('/api',bodyParser.json({ limit: '200mb' }), [login, adminRoute, fileUploadRoute, userDashboardRoute, confRoute, scormRoute, schedule, contacts, registration, logRoute, fullCalendar,reports, scormRoute]);
 
 // Render Initial HTML
 const renderFullPage = (html, initialState) => {

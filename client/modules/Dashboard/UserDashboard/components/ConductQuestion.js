@@ -22,6 +22,7 @@ import moment from 'moment';
 import Loading from '../../../App/components/Loading';
 import dataStyle from '../../../../components/DataTable/DataTable.css'; 
 import { workDashboardReload } from './WorkDashboardReloadReducer';
+import ScormPlayer from '../components/ScormPlayer';
 var _ = require('lodash');
 
 //All changes - Prateek
@@ -93,7 +94,7 @@ class ConductQuestion extends Component{
 		let questionnaireId = this.props.workDashboardData.questionnaireId;
 		let topicId = this.props.workDashboardData.tid;
 		let uid = this.props.workDashboardData.uid;
-		this.props.dispatch(getQuestions({questionnaireId, topicId})).then(res => this.setServerResponse(res));				
+		this.props.dispatch(getQuestions({questionnaireId, topicId})).then(res => this.setServerResponse(res));	
 	}
 
 	setServerResponse = (res) => {
@@ -203,7 +204,7 @@ class ConductQuestion extends Component{
   render() {
 		let cls_marksInlineCss = `${styles.marksCss} pull-right`;
 		let cls_resultsUserName = `${styles.resultsUserName} text-center`;
-	
+
 		if (this.props.workDashboardData.questionsData) {
 		  return (
 				<div>
@@ -384,7 +385,15 @@ class ConductQuestion extends Component{
 						    }
 						    <div className={styles.topicsListBody}>
 						    	<ul>
-								    {
+										{	this.props.workDashboardData.questionsData.questionnaireType === 'scorm' ? 
+											<div className={styles.mediaView}>
+												<ScormPlayer id={this.props.workDashboardData.questionsData.scormId} 
+																		roomId={this.props.workDashboardData.roomId}
+																		topicId={this.props.workDashboardData.tid}
+																		questionnaireId={this.props.workDashboardData.questionnaireId}	
+																		className={styles.scormWrapper} />
+											</div>
+											:
 						          this.props.workDashboardData.questionsData.questions
 						          ?
 						          this.props.workDashboardData.questionsData.questions.length > 0

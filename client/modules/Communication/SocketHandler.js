@@ -102,12 +102,12 @@ export default class SocketHandler{
 			console.log("Status Received", e.data);
 			if(e.data && e.data.data && e.data.data!='online') {
 				let findUser = _.indexOf(online, e.data.from);
-	      let removeUser  = _.pullAt(online, [findUser]);
-  		  store.dispatch(OnlineStatus(online));
-	    } else {
-	    	online.push(e.data.from);
-  		  store.dispatch(OnlineStatus(online));
-	    }
+	      		let removeUser  = _.pullAt(online, [findUser]);
+  		  		store.dispatch(OnlineStatus(online));
+	    	} else {
+	    		online.push(e.data.from);
+  		  		store.dispatch(OnlineStatus(online));
+	    	}
 		});
 
 		// Initialize a Peer object

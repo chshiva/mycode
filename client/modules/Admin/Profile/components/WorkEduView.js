@@ -232,6 +232,7 @@ export class WorkEduView extends Component {
       schoolDesc: '',
       skillList: [],
       value: '',
+      country: '',
       yearFrom: moment().format('DD/MM/YYYY'),
       yearFromFormat: "DD/MM/YYYY",
       yearFromInputFormat: "DD/MM/YYYY",
@@ -521,10 +522,10 @@ export class WorkEduView extends Component {
       if (this.state.company == '' || this.validCompanyStatus) errors['companyError'] = <FormattedMessage id='Please_enter_Company' />;
       if (this.validPositionStatus || this.state.position == '') errors['positionError'] = <FormattedMessage id='Please_enter_Position' />;
       if (this.validCountryStatus == false) {
-        errors['countryError'] = <FormattedMessage id='Please_enter_valid_City_Town' />;
+        errors['countryError'] = <FormattedMessage id='Please_enter_valid_Country' />;
       }
       if (this.validCityStatus == false) {
-        errors['cityError'] = <FormattedMessage id="Please_enter_valid_Country" />;
+        errors['cityError'] = <FormattedMessage id="Please_enter_valid_City_Town" />;
         this.refs.city.focus()
       }
       if (this.state.inputFromYear == false) errors['startDateError'] = <FormattedMessage id="Please_enter_valid_From_Date" />;
@@ -552,10 +553,10 @@ export class WorkEduView extends Component {
       if (this.state.company == '' || this.validCompanyStatus) errors['companyError'] = <FormattedMessage id='Please_enter_Company' />;
       if (this.validPositionStatus || this.state.position == '') errors['positionError'] = <FormattedMessage id='Please_enter_Position' />;
       if (this.validCountryStatus == false) {
-        errors['countryError'] = <FormattedMessage id='Please_enter_valid_City_Town' />;
+        errors['countryError'] = <FormattedMessage id='Please_enter_valid_Country' />;
       }
       if (this.validCityStatus == false) {
-        errors['cityError'] = <FormattedMessage id="Please_enter_valid_Country" />;
+        errors['cityError'] = <FormattedMessage id="Please_enter_valid_City_Town" />;
         this.refs.city.focus()
       }
       if (this.state.inputFromYear == false) errors['startDateError'] = <FormattedMessage id="Please_enter_valid_From_Date" />;
@@ -607,6 +608,14 @@ export class WorkEduView extends Component {
       this.refs.school.focus()
     } if (this.state.inputFromYear == false) {
       errors['startDateError'] = <FormattedMessage id="Please_enter_valid_From_Date" />;
+    }
+    if (this.validCountryStatus === false) {
+      errors['countryError'] = <FormattedMessage id='Please_enter_valid_Country' />;
+      this.refs.country.focus();
+    }
+    if (this.validCityStatus === false) {
+      errors['cityError'] = <FormattedMessage id="Please_enter_valid_City_Town" />;
+      this.refs.city.focus();
     }
     if (this.state.inputToYear == false) {
       errors['endDateError'] = <FormattedMessage id="Please_enter_valid_To_Date" />;
@@ -714,6 +723,14 @@ export class WorkEduView extends Component {
     } if (this.state.inputFromYear == false) {
       errors['startDateError'] = <FormattedMessage id="Please_enter_valid_From_Date" />;
     }
+    if (this.validCountryStatus === false) {
+      errors['countryError'] = <FormattedMessage id='Please_enter_valid_Country' />;
+      this.refs.country.focus();
+    }
+    if (this.validCityStatus === false) {
+      errors['cityError'] = <FormattedMessage id="Please_enter_valid_City_Town" />;
+      this.refs.city.focus();
+    }
     if (this.state.inputToYear == false) {
       errors['endDateError'] = <FormattedMessage id="Please_enter_valid_To_Date" />;
     } else if (+ipstime > +now) {
@@ -788,12 +805,12 @@ export class WorkEduView extends Component {
   }
 
   handleChange = (e) => {
-    this.setState({ value: e.target.value });
+    this.setState({ value: e.target.value, validationError : {}});
   }
 
   handleKeyPress = (e) => {
 
-    console.log("e.key === ", e.key);
+    // console.log("e.key === ", e.key);
     if (e.key === 'Enter' || e.key === ',') {
       let skill = e.target.value.trim();
       if (skill != '') {
@@ -1020,12 +1037,14 @@ export class WorkEduView extends Component {
               <label htmlFor="inputCity" className="control-label col-md-3" ><FormattedMessage id='city_town' />:</label>
               <div className="col-md-9">
                 <input id="city" type="text" className="form-control" value={this.state.city} onChange={this.handleCity.bind(this)} ref="city" maxLength={20} />
+                <label id="cityError" className={compStyles.errorPre} >{this.state.validationError && this.state.validationError.cityError ? this.state.validationError.cityError : ''}</label>
               </div>
             </div>
             <div className="form-group">
               <label htmlFor="inputCountry" className="control-label col-md-3" ><FormattedMessage id='country' />:</label>
               <div className="col-md-9">
                 <input id="country" type="text" className="form-control" value={this.state.country} onChange={this.handleCountry.bind(this)} ref="country" maxLength={20} />
+                <label id="countryError" className={compStyles.errorPre} >{this.state.validationError && this.state.validationError.countryError ? this.state.validationError.countryError : ''}</label>
               </div>
             </div>
             <div className="form-group ">
@@ -1108,12 +1127,14 @@ export class WorkEduView extends Component {
               <label htmlFor="inputCity" className="control-label col-md-3" ><FormattedMessage id='city_town' />:</label>
               <div className="col-md-9">
                 <input id="city" type="text" className="form-control" value={this.state.city} onChange={this.handleCity.bind(this)} ref="city" maxLength={20} />
+                <label id="cityError" className={compStyles.errorPre} >{this.state.validationError && this.state.validationError.cityError ? this.state.validationError.cityError : ''}</label>
               </div>
             </div>
             <div className="form-group">
               <label htmlFor="inputCountry" className="control-label col-md-3" ><FormattedMessage id='country' />:</label>
               <div className="col-md-9">
                 <input id="country" type="text" className="form-control" value={this.state.country} onChange={this.handleCountry.bind(this)} ref="country" maxLength={20} />
+                <label id="countryError" className={compStyles.errorPre} >{this.state.validationError && this.state.validationError.countryError ? this.state.validationError.countryError : ''}</label>
               </div>
             </div>
             <div className="form-group ">

@@ -48,6 +48,9 @@ const topicSchema = new Schema({
     type:Boolean,
     default:false
   },
+  topicIndex: { 
+    type : String
+  },
   createdBy : { 
     type : mongoose.Schema.Types.ObjectId, 
     ref : 'Users'

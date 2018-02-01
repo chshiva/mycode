@@ -101,6 +101,13 @@ class DataTable extends Component {
   handleUpload(e) {
     this.props.handleUpload(e)
   }
+  handleMediaUpload(e) {
+    this.props.handleMediaUpload(e);
+  }
+
+  handleMediaUpload(e) {
+    this.props.handleMediaUpload(e);
+  }
 
   handleUrlUpload() {
     this.props.handleUrlUpload(this.refs.url.value)
@@ -352,7 +359,7 @@ class DataTable extends Component {
                                 </p>
                               </div>
                               <div className={cls_mediaUpload}>
-                                <input type="file" id="mediaFiles" accept=".png,.jpeg,.jpg,.gif,.wav,.mp3,.mp4,.webm,.avi,.mkv,.vob" onChange={this.handleUpload.bind(this)} value={''}/>
+                                <input type="file" id="mediaFiles" accept=".png,.jpeg,.jpg,.gif,.wav,.mp3,.mp4,.webm,.avi,.mkv,.vob" onChange={this.handleMediaUpload.bind(this)} value={''}/>
                                 <img src="/images/white-icons/media.png" />
                               </div>
                               <p><FormattedMessage id='media_title' /></p>

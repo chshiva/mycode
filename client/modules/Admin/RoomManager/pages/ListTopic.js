@@ -8,7 +8,7 @@ import AuthClient from '../../../../components/AuthController';
 import { isLoggedIn } from '../../../Login/LoginActions';
 import { loggedInData } from '../../../Login/LoginReducer';
 import Validator from '../../../../components/Validator';
-import { RoomTopicList, getRoomData, UpdateRoomSchema, ClearRoom, DeleteTopic, handleTopicEnable } from '../RoomActions';
+import { RoomTopicList, getRoomData, UpdateRoomSchema, ClearRoom, DeleteTopic, handleTopicEnable, getCourseTopicsData} from '../RoomActions';
 //import { addRoomUser, getRoomData, getRoomUserData, ClearRoom,UpdateRoomSchema } from '../RoomActions';
 import { roomData } from '../RoomReducer';
 import { Roles } from '../../../../roles';
@@ -37,7 +37,8 @@ import { intlData } from '../../../Intl/IntlReducer';
 import { setWorkDashboard } from '../../../Dashboard/UserDashboard/components/WorkDashboardActions';
 import WoogeenManager from '../../../Communication/WoogeenManager';
 import { workDashboardData } from '../../../Dashboard/UserDashboard/components/WorkDashboardReducer';
- 
+import  TopicsIndexList from '../components/TopicsIndexList';
+
 var dataObject = {};
 
 class ListTopic extends Component {
@@ -45,7 +46,8 @@ class ListTopic extends Component {
     super(props);
     this.state  = {
       searchValue : '',
-      loading : true
+      loading : true,
+      showTopicIndex: false
     }
     this.schema = roomTopicSchema;
     this.res = {};
@@ -65,6 +67,7 @@ class ListTopic extends Component {
     //this.mainmenu.menus[0].action = this.clearError.bind(this);
 
     this.mainmenu.menus[0].action = this.addtopic.bind(this);
+    this.mainmenu.menus[1].action = this.showOrHideTopicsIndexList.bind(this);
 
     this.submenu.menus[0].action = this.viewroom.bind(this);
     this.submenu.menus[1].action = this.adduser.bind(this);
@@ -91,7 +94,7 @@ class ListTopic extends Component {
   }
 
   componentDidMount() {
-    this.setdata(this.props.loggedInData)
+    this.setdata(this.props.loggedInData);
   }
 
   setdata(result){
@@ -194,6 +197,7 @@ class ListTopic extends Component {
     };
 
     this.confObject.sendMessage(obj, 0);
+    this.props.dispatch(getCourseTopicsData(this.props.params.cid));
 
     this.getData({
         currentPage  : this.currentPage,
@@ -309,13 +313,27 @@ class ListTopic extends Component {
     );
   }
 
+  showTopicIndex(row){
+    if(row.topicIndex) {
+      return(
+        <div>{row.topicIndex}</div>
+      );
+    } else {
+      return(
+        <div>--</div>
+      );
+    }
+  }
+
   handleEnableTopic = (e)=>  {
     let topicEnable = e.currentTarget.value == "true" ? false : true;
     let id = e.currentTarget.id;
+    // this.props.dispatch(getCourseTopicsData(this.props.roomId));
     this.props.dispatch(handleTopicEnable(topicEnable, id)).then(res => this.topicEnableResponse(res));  
   }
 
   topicEnableResponse = (res) => {
+    
     let tid = res && res.topicData && res.topicData.id ? res.topicData.id : '' ;
 
     let obj = {
@@ -325,6 +343,26 @@ class ListTopic extends Component {
       };
 
     this.confObject.sendMessage(obj, 0);
+    this.props.dispatch(getCourseTopicsData(this.props.params.cid));
+
+    if(res.status == true && res.topicData && res.topicData.topicEnable == false) {
+      if(this.props.roomData && this.props.roomData.topicdata && this.props.roomData.topicdata.length  && this.props.roomData.topicdata.length > 0 ) {
+        var response = this.setResponse;
+        alertify.confirm(this.props.intl.messages.warning,this.props.intl.messages.topic_index_alert, 
+          function (result) {
+            if(result) { 
+              response(result)          
+            }
+          },
+          function() {
+
+          }
+        ).setting('labels',{'ok': this.props.intl.messages.ok,'cancel': this.props.intl.messages.cancel});
+      }
+    }
+  }
+  setResponse = (res) => {
+    this.setState({showTopicIndex: !this.state.showTopicIndex});
   }
 
   topicEnable(row) {
@@ -336,14 +374,47 @@ class ListTopic extends Component {
       ):"Not Allowed ";
       return viewTopicEnable
   }
+
+  showOrHideTopicsIndexList(e){
+    this.setState({showTopicIndex: !this.state.showTopicIndex});
+  }
+
+
+  handleModel(res){
+    if(res.status) {
+      this.setState({showTopicIndex: false}); 
+      this.refs.room_container.success(`${res.message} `, ``); 
+
+      this.getData({
+        currentPage  : this.currentPage,
+        totalItems   : 0,
+        itemsPerPage : this.itemsPerPage
+      });
+    }
+  }
  
   render() {
     if(this.props.loggedInData && this.props.loggedInData.data) {
       var role = this.props.loggedInData.data.role
     }
+    let indexTopics = [];
+    let nonIndexTopics= [];
 
+    if(this.props.roomData && this.props.roomData.topicList && this.props.roomData.topicList.length > 0) {
+      this.props.roomData.topicList.map((data,i) => {
+        if(this.props.roomData && this.props.roomData.topicList[i]) {
+          if(this.props.roomData.topicList[i].topicIndex) {
+            indexTopics.push(this.props.roomData.topicList[i]);
+          } else  {
+          nonIndexTopics.push(this.props.roomData.topicList[i]);
+          }
+        }
+      });
+    }
+    let topics = _.sortBy(indexTopics, [function(o) { return o.topicIndex; }]).concat(nonIndexTopics);
     if(role != Roles.Superadmin) {
       var objDisp = [
+            { title : <FormattedMessage id='topic_index' />, type : "functon", callback : this.showTopicIndex},
             { title : <FormattedMessage id='topic_name' />, type : "functon", callback : this.showTopicName, sort : true, dbName : 'topicName' },
             { title : <FormattedMessage id='description' />, type : "function", callback : this.description, sort : true, dbName :'description'},
             { title : <FormattedMessage id='edit' />, type : "function", callback : this.editRoomTopic },
@@ -355,6 +426,7 @@ class ListTopic extends Component {
           ];
     } else {
       var objDisp = [
+            { title : <FormattedMessage id='topic_index' />, type : "functon", callback : this.showTopicIndex},
             { title : <FormattedMessage id='topic_name' />, type : "functon", callback : this.showTopicName, sort : true, dbName : 'topicName' },
             { title : <FormattedMessage id='description' />, type : "function", callback : this.description, sort : true, dbName : 'description' },
             { title : <FormattedMessage id='content' />, type : "function", callback : this.viewRoomTopic },
@@ -385,7 +457,7 @@ class ListTopic extends Component {
           ref="room_container"
           className="toast-top-right"
         />
-        <DataTable data={this.props.roomData.topicList}
+        <DataTable data={topics}
             count={this.props.roomData.topiccount}
             currentPage = {this.props.roomData.currentTopicPage}
             submenu={this.submenu}
@@ -399,6 +471,7 @@ class ListTopic extends Component {
             filter={filter}
             loading={this.state.loading}
         />
+        <TopicsIndexList  showModal={this.state.showTopicIndex} hidecallback={this.showOrHideTopicsIndexList.bind(this)} roomId= {this.props.params.cid} callback = {this.handleModel.bind(this)}/>
       </div>
     );
   }

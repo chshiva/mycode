@@ -6,14 +6,15 @@ import _ from 'underscore';
 
 import Validator from '../../../../components/Validator';
 import { roomData } from '../RoomReducer';
+import { loggedInData } from '../../../Login/LoginReducer';
 import DataTable from '../../../../components/DataTable/DataTable';
-import { roomEditSubMenu, roomCertificatesMainMenu } from '../schema/RoomMenu';
+import { roomEditSubMenu, roomNoTopicSubMenu, roomCertificatesMainMenu } from '../schema/RoomMenu';
 
 
 // Import Style
 import styles from '../../../../components/component.css';
-
-import { ClearRoom, getCertificateData, toggleCertificateDownload } from '../RoomActions';
+import { loginLanguage } from '../../../Intl/IntlActions';
+import { getRoomData, ClearRoom, getCertificateData, toggleCertificateDownload } from '../RoomActions';
 import { intlData } from '../../../Intl/IntlReducer';
 import { ToastContainer, ToastMessage } from '../../../../lib';
 const ToastMessageFactory = React.createFactory(ToastMessage.animation);
@@ -30,7 +31,7 @@ class ListCertificates extends Component {
     this.currentPage = 1;
     this.itemsPerPage = 5;
 
-    this.submenu = Validator.activeSubMenu(roomEditSubMenu, 'lnkCertificates');
+    this.submenu = Validator.activeSubMenu(roomNoTopicSubMenu, 'lnkCertificates');
     this.mainmenu = roomCertificatesMainMenu;
     this.getData = this.getData.bind(this);
     this.approveCertificate = this.approveCertificate.bind(this);
@@ -40,21 +41,33 @@ class ListCertificates extends Component {
 
     this.submenu.menus[0].action = this.viewroom.bind(this);
     this.submenu.menus[1].action = this.adduser.bind(this);
-    this.submenu.menus[2].action = this.listtopic.bind(this);
-    this.submenu.menus[3].action = this.feedbackList.bind(this);
-    this.submenu.menus[4].action = this.roomConfiguration.bind(this);
-    this.submenu.menus[5].action = this.listAssignments.bind(this);
-    this.submenu.menus[6].action = this.courseReports.bind(this);
-    this.submenu.menus[7].action = this.listCertificates.bind(this);
+    this.submenu.menus[2].action = this.feedbackList.bind(this);
+    this.submenu.menus[3].action = this.roomConfiguration.bind(this);
+    this.submenu.menus[4].action = this.listAssignments.bind(this);
+    this.submenu.menus[5].action = this.courseReports.bind(this);
+    this.submenu.menus[6].action = this.listCertificates.bind(this);
   }
 
   componentDidMount() {
+    this.setdata(this.props.loggedInData);
+  }
+
+  setdata(result){
+    if (result && result.data && result.data._id) {
+      this.props.dispatch(loginLanguage(result.data, this.props.intlData.setlocale));
+      var obj = {
+      uid : result.data._id,
+      roomId : this.props.params.cid
+    }
     this.getData({
       currentPage: this.currentPage,
       totalItems: 0,
       itemsPerPage: this.itemsPerPage,
     });
+    this.props.dispatch(getRoomData(obj,''));
+    }
   }
+
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.roomData.success !== '') {
@@ -105,7 +118,9 @@ class ListCertificates extends Component {
   }
 
   getData(pageParam, sort = { 'student.firstname': 1 }) {
-    if (sort != null) {
+    if (_.isEmpty(sort)) {
+      pageParam.sortObj = { 'student.firstname': 1 };
+    } else {
       pageParam.sortObj = sort;
     }
     pageParam.roomId = this.props.params.cid;
@@ -191,7 +206,7 @@ class ListCertificates extends Component {
 
   render() {
     const objDisp = [
-        { title: <FormattedMessage id="student_name" />, type: 'function', callback: this.showStudentName, sort: true, dbName: 'student.firstname' },
+        { title: <FormattedMessage id="student_name" />, type: 'function', callback: this.showStudentName, sort: true, dbName: 'firstname' },
         { title: <FormattedMessage id="topics_completed" />, type: 'function', callback: this.showTopicsCompleted },
         { title: <FormattedMessage id="questionnaire" />, type: 'function', callback: this.showQuestionnaireCompleted },
         { title: <FormattedMessage id="grade" />, type: 'function', callback: this.showQuestionnaireGrade },
@@ -201,6 +216,25 @@ class ListCertificates extends Component {
     const filter = [
         { type: 'search', id: 'studentSearch', selectedfilter: this.searchFilter },
     ];
+
+    /* if package have topics feature */
+    if (this.props.roomData && this.props.roomData.data && !_.isEmpty(this.props.roomData.data)) {
+      let roomData = this.props.roomData.data;
+      if (roomData.selPackage && roomData.selPackage.features.indexOf("Topics") != -1) {
+        this.submenu = Validator.activeSubMenu(roomEditSubMenu, "lnkCertificates");
+        this.submenu.menus[0].action = this.viewroom.bind(this);
+        this.submenu.menus[1].action = this.adduser.bind(this);
+        this.submenu.menus[2].action = this.listtopic.bind(this);
+        this.submenu.menus[3].action = this.feedbackList.bind(this);
+        /* commented because of no functionality, need to implement */ 
+        // this.submenu.menus[4].action = this.addLocation.bind(this);
+
+        this.submenu.menus[4].action = this.roomConfiguration.bind(this);
+        this.submenu.menus[5].action = this.listAssignments.bind(this);
+        this.submenu.menus[6].action = this.courseReports.bind(this);
+        this.submenu.menus[7].action = this.listCertificates.bind(this);                
+      }
+    }
 
     const breadcrumb = (
       <div className={styles.dynamicBreadCrumb}>
@@ -256,6 +290,7 @@ function mapStateToProps(state) {
     intl: state.intl,
     roomData: roomData(state),
     intlData: intlData(state),
+    loggedInData: loggedInData(state)
   };
 }
 

@@ -50,7 +50,7 @@ class QuestionPopup extends Component {
       modules: {
         toolbar: [
           [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-          ['bold', 'italic', 'underline',  'videoURL'],
+          ['bold', 'italic', 'underline',  'videoURL', 'video'],
           ['image', 'code-block'],['formula'],
           [{ 'size': ['small', false, 'large', 'huge'] }],
           [{ 'list': 'ordered'}, { 'list': 'bullet' }],

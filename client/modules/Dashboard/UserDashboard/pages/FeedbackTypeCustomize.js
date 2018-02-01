@@ -21,12 +21,14 @@ import { browserHistory } from 'react-router';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { Roles } from '../../../../roles.js';
 import { intlData } from '../../../Intl/IntlReducer';
+import RenderQuestions from '../../../Admin/Questionnaire/components/RenderQuestions';
+import createRandomString from '../../../../../server/randomstring';
 var _ = require('lodash');
 
 export class FeedbackTypeCustomize extends Component {  
   constructor(props) {
     super(props);    
-    this.form = {};
+    this.form = [];
     this.roles = '';  
   }
 
@@ -52,32 +54,42 @@ export class FeedbackTypeCustomize extends Component {
   }*/
 
   handleRadioChange = (question, questionType, e) => {
-    let name = question;
     let value = e.target.value.trim();
-    if(this.form[name] == undefined) {
-      this.form[name] = [value]
-    } else if(questionType == 'Checkbox'){
-      if(this.form[name].includes(value)) {
-        let index = _.findIndex(this.form[name], value);
-        this.form[name].splice(index,1);
-      } else {
-        this.form[name].push(value)
-      }      
+    let obj = {};    
+    let index = _.findIndex(this.form, function(formData) {
+      return _.isEqual(formData.question, question)
+    });
+    if(index === -1) {
+      obj['question'] = question;
+      obj['answer'] = [value];
+      this.form.push(obj);
     } else {
-      this.form[name] = [value]
-    }        
+      if(questionType === 'Checkbox') {
+        if(this.form[index]['answer'].includes(value)) {
+          let ansIndex = _.findIndex(this.form[index]['answer'], function(element) {
+            return element === value
+          });
+          this.form[index]['answer'].splice(ansIndex,1);
+        } else {
+          this.form[index]['answer'].push(value)
+        }        
+      } else {
+        this.form[index]['answer'] = [value]
+      }
+    }          
   }
 
   handleSubmit = (e) => {
     e.preventDefault();     
     var data ={};
-    let dataobj = this.form;
-    let isEmpty = _.isEmpty(dataobj);
-    if(isEmpty) {
+    let dataobj = _.remove(this.form, function(n) {
+      return n.answer.length>0;
+    });
+    if(_.isEmpty(dataobj)) {
       this.refs.feedback_container.error("Select atleast One Feedback to submit");
-    }else {
-      data["feedbacks"] = this.form;      
-      data["roomKey"] = this.props.roomkey;
+    }else {      
+      data["feedbacks"] = dataobj;      
+      data["roomKey"] = this.props.roomkey; 
       var feedbackData = {
         data
       } 
@@ -96,15 +108,15 @@ export class FeedbackTypeCustomize extends Component {
     browserHistory.push('/dashboard');  
   }
 
-  renderOptions = (questionOptions, question, questionType) => {
+  renderOptions = (questionOptions, question, questionType, index) => {
     let cls_custfbInputRadio = `${styles.custFbInput} ${styles.radio}`
-    let cls_custfbInputCheckbox = `${styles.custFbInput} ${styles.checkbox}`
+    let cls_custfbInputCheckbox = `${styles.custFbInput} ${styles.checkbox}`;
     return (
       <li>
         {questionOptions.map((optionData,i) => {
           var randomNumber = Math.floor(Math.random(0, 9)*1000*2);
           return <label className={styles.custRadioBlock} key = {randomNumber}>
-            <input type={questionType == 'Radio' || questionType == 'TF'?"radio":'checkbox'} name = {question} value = {optionData} className={questionType == 'Radio' || questionType == 'TF'?cls_custfbInputRadio:cls_custfbInputCheckbox} onClick = {this.handleRadioChange.bind(this, question, questionType)} />
+            <input type={questionType == 'Radio' || questionType == 'TF'?"radio":'checkbox'} name = {index} value = {optionData} className={questionType == 'Radio' || questionType == 'TF'?cls_custfbInputRadio:cls_custfbInputCheckbox} onClick = {this.handleRadioChange.bind(this, question, questionType)} />
             <div className={styles.custRatingOptions}>{optionData}</div>
             </label> 
         })}            
@@ -142,12 +154,12 @@ export class FeedbackTypeCustomize extends Component {
                 <div className={styles.fdBody}>
                   <div className={styles.midChoice}>
                     <form>
-                      {this.props.dashboardData.questionnaireData.questions.map((questionData) => {
+                      {this.props.dashboardData.questionnaireData.questions.map((questionData, i) => {
                         return <div className={styles.fdBlock} key={questionData._id}>
                           <Row>
                             <Col md={12}>
                               <div className={styles.fbQuestion}>
-                                <p>{questionData.question}</p>
+                                <RenderQuestions question={questionData.question} /> 
                               </div>
                             </Col>
                           </Row>
@@ -155,7 +167,7 @@ export class FeedbackTypeCustomize extends Component {
                             <Col md={12}>
                               <div className={styles.fbOptions}>
                                 <ul>
-                                  {this.renderOptions(questionData.options, questionData.question, questionData.questionType)}                      
+                                  {this.renderOptions(questionData.options, questionData.question, questionData.questionType, i)}                      
                                 </ul>
                               </div>
                             </Col>

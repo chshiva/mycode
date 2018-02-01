@@ -65,7 +65,11 @@ class TextBox extends Component {
  
 TextBox.propTypes = {
   data: PropTypes.object.isRequired,
-  value: PropTypes.string,
+  // value: PropTypes.string,
+  value: React.PropTypes.oneOfType([
+    React.PropTypes.string,
+    React.PropTypes.number
+  ]),
   callback: PropTypes.func,
   required: PropTypes.bool,
   datavalue: PropTypes.node

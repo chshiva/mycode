@@ -16,6 +16,7 @@ import { workDashboardReload } from './WorkDashboardReloadReducer';
 import { Roles } from '../../../../roles';
 import Analytics from '../../../Communication/Analytics';
 import { questionnaireData } from '../../../Admin/Questionnaire/QuestionnaireReducer';
+import ScormPlayer from './ScormPlayer';
 
 
 class TopicList extends Component{
@@ -41,7 +42,7 @@ class TopicList extends Component{
 	}
 
 	handleFullTopic(data) {
-		let obj = { current: 'topicList', topicContent: true, topicList: false, tid: data._id, conductQuestion: false, questionData: null, pdfView: false, topicPdfFileData: null };
+		let obj = { current: 'topicList', topicContent: true, topicList: false, tid: data._id, conductQuestion: false, questionData: null, pdfView: false, scormView: false, topicPdfFileData: null };
 		var _objAnalytics = new Analytics();
 		let logObj = {
 			topicId: data._id,
@@ -55,7 +56,7 @@ class TopicList extends Component{
 	}
 
 	handleList(){
-		let obj = {current : 'topicList', topicContent: false, topicList : true, conductQuestion : false, conductQuestion : false, questionData : null, pdfView : false, topicPdfFileData: null }
+		let obj = {current : 'topicList', topicContent: false, topicList : true, conductQuestion : false, conductQuestion : false, questionData : null, pdfView : false, scormView: false, topicPdfFileData: null }
 		this.handleWorkDashboard(obj);
 	}
 
@@ -78,6 +79,19 @@ class TopicList extends Component{
     let assignmentLink = '/admin/room/assignments/' + this.props.roomId;
     let questionnaireLink = '/admin/questionnaire/list';
 
+    let indexTopics = [];
+    let nonIndexTopics= [];
+    if(this.props.workDashboardData && this.props.workDashboardData.topiclistData && this.props.workDashboardData.topiclistData.length > 0) {
+	    this.props.workDashboardData.topiclistData.map((data,i) => {
+	    	if(this.props.workDashboardData && this.props.workDashboardData.topiclistData[i] && this.props.workDashboardData.topiclistData[i].topicIndex){
+	    		indexTopics.push(this.props.workDashboardData.topiclistData[i]);
+	    	} else {
+	    		nonIndexTopics.push(this.props.workDashboardData.topiclistData[i]);
+	    	}
+	    });
+	 }
+
+    let topics = indexTopics.concat(nonIndexTopics);
 		const topicList = this.props.workDashboardData.topicList
 	    ?
 			<div className={styles.whiteCard}>
@@ -127,9 +141,9 @@ class TopicList extends Component{
 		    <div className={styles.topicsListBody}>
 	  			<ul>
 	  				{
-	  					this.props.workDashboardData.topiclistData.length > 0
+	  					topics && topics.length > 0
 					    ?
-						    this.props.workDashboardData.topiclistData.map((data) => {
+						    topics.map((data, i) => {
 						    	return <TopicData key={data._id} data={data} contantCallback={this.handleFullTopic.bind(this)} sync={this.props.workDashboardData.sync} imHost={this.props.imHost} confObject={this.props.confObject} isGuest={this.props.isGuest} />
 						    }) 
 						  : <li>
@@ -157,7 +171,10 @@ class TopicList extends Component{
 			 		: null}
 			 		{this.props.workDashboardData.pdfView ?
 			 			<PdfView roomName = {this.props.roomName} imHost={this.props.imHost} topicListCallback={this.handleList.bind(this)} contantCallback={this.handleFullTopic.bind(this)} confObject={this.props.confObject} />
-			 		: null}
+					 : null}
+					 {this.props.workDashboardData.scormView ?
+					 	<ScormPlayer id={this.props.workDashboardData.fileId} roomName = {this.props.roomName} topicListCallback={this.handleList.bind(this)} contantCallback={this.handleFullTopic.bind(this)} />
+					 : null}
 			 </div>
 			)		
 		}

@@ -208,6 +208,11 @@ class EditGradeConfiguration extends Component {
       this.setState({
         UIArray : _.reverse(_.sortBy(addFieldValue, function(elements) {return elements.to}))
       }) 
+    } else if(e.target.value == '') {
+      this.refs.questionnaire_container.error('Empty fields are not allowed');
+      this.setState({
+        UIArray : _.reverse(_.sortBy(addFieldValue, function(elements) {return elements.to}))
+      }) 
     } else {
       this.refs.questionnaire_container.error('Should contain number ranging from 0 t0 100')
     }
@@ -241,6 +246,11 @@ class EditGradeConfiguration extends Component {
       this.setState({
         UIArray : _.reverse(_.sortBy(addFieldValue, function(elements) {return elements.to}))
       })
+    } else if(e.target.value == '') {
+      this.refs.questionnaire_container.error('Empty fields are not allowed');
+      this.setState({
+        UIArray : _.reverse(_.sortBy(addFieldValue, function(elements) {return elements.to}))
+      }) 
     } else {
       this.refs.questionnaire_container.error('Should contain number ranging from 0 t0 100')
     }

@@ -25,6 +25,9 @@ import {processForPlagiarismCheck} from './plagiarismcheck.controller';
 import serverConfig from '../config';
 import { sendPushNotificationAndroid } from './mobile.controller';
 import { roomStudentData } from './room.controller';
+
+var formidable = require('formidable');
+import { isScormPackage, processScormPackage, deleteScormPackage } from './scorm.controller';
 // var unoconv = require('better-unoconv');
 
 
@@ -258,11 +261,17 @@ export function uploadRoomTopicFile(req, res) {
                 status: false,
                 error: "Invalid File Extension."
               });
-            } else if (obj.fileSize > 20971520) {
+            } else if (obj.fileType != 'image' && obj.fileType != 'video' && obj.fileType != 'audio' && obj.fileSize > 20971520) {
               console.log("Topic upload - File Size exceeded");
               res.json({
                 status: false,
                 error: "File Size should be less than 20MB."
+              });
+            } else if ((obj.fileType == 'image' || obj.fileType == 'video' || obj.fileType == 'audio') && obj.fileSize > 100000000) {
+              console.log("Topic upload - File Size exceeded");
+              res.json({
+                status: false,
+                error: "File Size should be less than 100MB."
               });
             } else {
               let tempFileName = obj.fileName.replace(/[ )(]+/g, '');
@@ -352,12 +361,18 @@ export function uploadRoomTopicFile(req, res) {
 
                                 //For finding extension of filename
                                 let ext = fileName.substr(fileName.lastIndexOf(".") + 1);
-                                //For converting files to pdf by unoconv command using shell package 
+                                if(ext === 'zip' && isScormPackage(obj.fileName)){
+                                  let scormData = processScormPackage(obj.fileName);
+                                  obj['fileType'] = 'zip/scorm';
+                                  obj['_id'] = scormData.packageId;
+                                  obj['scormApiVersion'] = scormData.scormVersion;
+                                }
+                                   //For converting files to pdf by unoconv command using shell package 
                                 if ((ext == "doc") || (ext == "docx") || (ext == "odt") || (ext == 'xls') || (ext == 'xlsx') || (ext == 'ods') || (ext == 'ppt') || (ext == 'pptx') || (ext == "txt") || (ext == "jpg") || (ext == "png") || (ext == "jpeg") || (ext == "JPEG")) {
                                   if (shell.exec('unoconv -f pdf ' + dest).code !== 0) {
                                     shell.echo('Error: Converting failed');
                                   }
-                                }
+                                } 
                                 const objUser = new Uploads(obj);
                                 //Create new upload data in database
                                 Uploads.create([objUser], (error, data) => {
@@ -935,7 +950,7 @@ export function deleteFilesFromDest(doc, callback) {
   var status;
   try {
     //Verifying if document has fileType link or not
-    if (doc.fileType != 'link') {
+    if (doc.fileType != 'link' && doc.fileType != 'zip/scorm') {
       let path = doc.from && doc.from == 'Shared' ? (process.env.PWD + "/uploads/sharing_docs/") : (process.env.PWD + "/uploads/");
       
       //Path for original file
@@ -994,6 +1009,14 @@ export function deleteFilesFromDest(doc, callback) {
         status = true   
         callback(status)
       }
+    } else if(doc.fileType == 'zip/scorm') {
+      deleteScormPackage(doc._id, (result) => {
+        if(result) {
+          callback(true);
+        } else {
+          callback(false);
+        }
+      });
     } else {
       callback(true)
     }
@@ -1550,4 +1573,172 @@ export function uploadFileEnable (req, res) {
       res.json({ status : false, error : "Internal server error." });
     }
   });
+}
+
+
+export function mediaFileUplaod(req, res) {
+  if (req.params.token) {
+    let userQuery = Users.findOne({ token: req.params.token });
+    userQuery.exec(function (errPerson, person) {
+      if (errPerson) {
+        res.json({ status: false, error: errPerson });
+      } else {
+        // console.log("req.body", req.body.uid);;
+        // console.log("person", person);
+        //Verifying if request is valid or not
+        if (req.body) {
+          let status  = false;
+          var obj = req.params;
+          delete obj["token"];
+          
+          //Validating if user id and room id is valid or not
+          if (!obj.roomId || validator.isEmpty(obj.roomId) || !mongoose.Types.ObjectId.isValid(obj.roomId)) {
+            res.json({
+              status: false,
+              error: "Invalid Room."
+            });
+          } else if (!obj.topicId || validator.isEmpty(obj.topicId) || !mongoose.Types.ObjectId.isValid(obj.topicId)) {
+            res.json({
+              status: false,
+              error: "Invalid Topic."
+            });
+          } else if (person == null) {
+            res.json({
+              status: false,
+              error: "Invalid UserId."
+            });
+          } else {
+            //Query for checking is room is present in database or not
+            var query = Room.findOne({
+              _id: mongoose.Types.ObjectId(obj.roomId)
+            });
+            query.exec(function (err, docs) {
+              if (err) {
+                // console.log("err--", err);
+                res.json({
+                  status: false,
+                  error: "Room not found."
+                })
+              } else {
+
+                //Query for checking is topic is present in database or not
+                var topicQuery = Topic.findOne({
+                  _id: mongoose.Types.ObjectId(obj.topicId)
+                });
+                //delete obj['uid'];
+
+                topicQuery.exec(function (error, data) {
+                  if (error) {
+                    res.json({
+                      status: false,
+                      error: "Topic not found"
+                    })
+                  } else {
+
+                    // create an incoming form object
+                    var form = new formidable.IncomingForm();
+
+                    // specify that we want to allow the user to upload multiple files in a single request
+                    form.multiples = true;
+                    
+                    // store all uploads in the /uploads directory
+                    form.uploadDir = process.env.PWD + "/uploads";
+
+                    // rename it to it's orignal name
+                    form.on('file', function(field, file) {
+                    var randomstring = '';
+                    
+                    //Function call for creating randomstring
+                    createRandomString(function (data) {
+                      randomstring = data
+                    });
+
+                    // For removing spaces, parantheses in filename
+                    var fileName = file.name.replace(/[ )(]+/g, '');
+                    obj["fileType"] = file.type.substring(0, file.type.indexOf("/"));
+                    
+                    //Destination for upload file
+                    let newFileName = randomstring + "_" + fileName;
+                    obj['fileName'] = newFileName;
+                    if (obj.fileType != 'image' && obj.fileType != 'video' && obj.fileType != 'audio') {
+                      console.log("Topic upload1 - Invalid File Extension");
+                      res.json({
+                        status: false,
+                        error: "Invalid File Extension."
+                      });
+                    } else if (obj.fileSize > 155000000) {
+                      console.log("Topic upload - File Size exceeded");
+                      res.json({
+                        status: false,
+                        error: "File Size should be less than 100MB."
+                      });
+                    } else {
+                      status = true;
+                      fs.rename(file.path, path.join(form.uploadDir, newFileName));
+                    }
+                  });
+
+                  // log any errors that occur
+                  form.on('error', function(err) {
+                    console.log('An error has occured: \n' + err);
+                    res.json({
+                      status: false,
+                      error: err
+                    });
+                  });  
+                  // once all the files have been uploaded, send a response to the client
+                  form.on('end', function() {
+                    console.log('End here...');
+                    if (status) {
+                      obj['createdAt'] = moment().utc().toDate();
+                      obj['createdBy'] = mongoose.Types.ObjectId(person._id);
+                      
+                      const objfile = new Uploads(obj);
+                      //Create new upload data in database
+                      Uploads.create([objfile], (error, data) => {
+                        if (!error) {
+                          res.json({
+                            status: true,
+                            data: data[0],
+                            message: "Upload successfully."
+                          });
+                        } else {
+                          //console.log(error)
+                          res.json({
+                            status: false,
+                            error: "Upload not Done."
+                          });
+                        }
+                      });
+                    } else {
+                      res.json({
+                        status: false,
+                        error: "Internal server error, Please try again"
+                      });
+                    }
+                    // res.json({status : 'success'});
+                  });  
+                      
+                  // parse the incoming request containing the form data
+                  form.parse(req);
+                  }
+                });
+                
+              }
+            });
+          }
+        } else {
+          res.json({
+            status: false,
+            error: "Invalid Request"
+          })
+        }
+      }
+    });
+  } else {
+    res.json({
+      status: false,
+      error: "Invalid Request"
+    })
+  }
 }

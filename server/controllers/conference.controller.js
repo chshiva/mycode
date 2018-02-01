@@ -146,26 +146,37 @@ function createToken(room, userName, role, selPackage, callback) {
                   request.post(options, function(error, response, body){
                     // console.log("token response - ", moment());
                     if(!error){
-                      if(response.errno){
+                      if(response && response.errno){
                         let obj = {
                           validPackage : validPackage,
                           packageData : packageData,
-                          response : response.errno
+                          response : response.errno,
+                          serverResponse : false
                         }
                         callback(false, obj);
-                      }else{
+                      } else if (response && response.body && response.body != "Not Found") {
                         let obj = {
                           validPackage : validPackage,
                           packageData : packageData,
-                          response : response.body
+                          response : response.body,
+                          serverResponse : true
                         }
                         callback(true, obj);
+                      } else {
+                        let obj = {
+                          validPackage : validPackage,
+                          packageData : packageData,
+                          response : "Not Found",
+                          serverResponse : false
+                        }
+                        callback(false, obj);
                       }
                     }else{
                       let obj = {
                         validPackage : validPackage,
                         packageData : packageData,
-                        response : error
+                        response : error,
+                        serverResponse : false
                       }
                       callback(false, obj);
                     }
@@ -175,13 +186,15 @@ function createToken(room, userName, role, selPackage, callback) {
                   let numberOfusers = '';
                   request.get(getUsersOptions, function(error, response, body){
                   // console.log("error === ", error);
-                    if (response && response.body) {
+                    if (response && response.body && response.body != "Not Found") {
+                      console.log("response === ", response.body);
                       numberOfusers = JSON.parse(response.body);
                       if(numberOfusers.length > (pkgRes.continuousPresence - 1)) {
                         let obj = {
                           validPackage : validPackage,
                           packageData : packageData,
-                          response : "Limit exceeded"
+                          response : "Limit exceeded",
+                          serverResponse : true
                         }
                         callback(false, obj);
                         //callback(false, "User limit excceded, please contact admin");
@@ -195,22 +208,33 @@ function createToken(room, userName, role, selPackage, callback) {
                               let obj = {
                                 validPackage : validPackage,
                                 packageData : packageData,
-                                response : response.errno
+                                response : response.errno,
+                                serverResponse : false
                               }
                               callback(false, obj);
-                            }else{
+                            } else if (response && response.body && response.body != "Not Found") {
                               let obj = {
                                 validPackage : validPackage,
                                 packageData : packageData,
-                                response : response.body
+                                response : response.body,
+                                serverResponse : true
                               }
                               callback(true, obj);
+                            } else {
+                              let obj = {
+                                validPackage : validPackage,
+                                packageData : packageData,
+                                response : "Not Found",
+                                serverResponse : false
+                              }
+                              callback(false, obj);
                             }
                           }else{
                             let obj = {
                               validPackage : validPackage,
                               packageData : packageData,
-                              response : error
+                              response : error,
+                              serverResponse : false
                             }
                             callback(false, obj);
                           }
@@ -222,7 +246,8 @@ function createToken(room, userName, role, selPackage, callback) {
                       let obj = {
                         validPackage : validPackage,
                         packageData : packageData,
-                        response : "Error while fatching serverLocation."
+                        response : "Error while fatching serverLocation.",
+                        serverResponse : false
                       }
                       callback(false, obj);
                     }
@@ -235,7 +260,8 @@ function createToken(room, userName, role, selPackage, callback) {
                 let obj = {
                   validPackage : validPackage,
                   packageData : packageData,
-                  response : "Package is expired."
+                  response : "Package is expired.",
+                  serverResponse : true
                 }
                 callback(false, obj);
 	              //callback(false, "Package is expired.");
@@ -245,7 +271,8 @@ function createToken(room, userName, role, selPackage, callback) {
               let obj = {
                 validPackage : validPackage,
                 packageData : packageData,
-                response : "Error while fatching serverLocation."
+                response : "Error while fatching serverLocation.",
+                serverResponse : false
               }
               callback(false, obj);
               //callback(false, "Error while fatching serverLocation.");
@@ -318,6 +345,8 @@ export function getToken(req, res){
                         resConfObj['enableLive'] = room.roomConfiguration.enableLive;
                         let currentDate = moment();
                         let roomValidity = moment(room.expiryDate);
+                        console.log("currentDate === ", currentDate.format("DD/MM/YYYY hh:mm A"));
+                        console.log("roomValidity === ", roomValidity.format("DD/MM/YYYY hh:mm A"));
                         if (+roomValidity >= +currentDate ) {
                           resConfObj['isExpiredRoom'] = false;
                         }
@@ -414,6 +443,7 @@ export function getToken(req, res){
                                         resConfObj['validPackage'] = token.validPackage;
                                         resConfObj['packageData'] = token.packageData;
                                         resConfObj['validCPLimit'] = true;
+                                        resConfObj['serverResponse'] = token.serverResponse;
   																			// console.log("OBJECT1----  ", resConfObj);
   																			res.json({status: true, data: resConfObj});	
                                         // let logObj = {
@@ -439,6 +469,7 @@ export function getToken(req, res){
                                         resConfObj['validPackage'] = token.validPackage;
                                         resConfObj['packageData'] = token.packageData;
                                         resConfObj['validCPLimit'] = false;
+                                        resConfObj['serverResponse'] = token.serverResponse;
                                         res.json({status: false, data : resConfObj});	
                                         // let logObj = {
                                         //   logType : 'Conference',
@@ -471,6 +502,7 @@ export function getToken(req, res){
                                         resConfObj['validPackage'] = token.validPackage;
                                         resConfObj['packageData'] = token.packageData;
                                         resConfObj['validCPLimit'] = true;
+                                        resConfObj['serverResponse'] = token.serverResponse;
   																			// console.log("OBJECT2----  ", resConfObj);
   																			res.json({status: true, data : resConfObj});
                                         
@@ -497,6 +529,7 @@ export function getToken(req, res){
                                         resConfObj['validPackage'] = token.validPackage;
                                         resConfObj['packageData'] = token.packageData;
                                         resConfObj['validCPLimit'] = false;
+                                        resConfObj['serverResponse'] = token.serverResponse;
                                         res.json({status: false, data : resConfObj}); 	
                                         
                                         // let logObj = {
@@ -613,11 +646,11 @@ export function fetchConferenceTopic(req, res) {
                 roomId : room._id,
                 topicEnable : true
               });
-              query.select('topicName topicEnable description')
+              query.select('topicName topicEnable description topicIndex')
             	query.populate('createdBy',  'firstname lastname profile.profileImage')
               // query.populate('questionnaire.questionnaireId',  'questionnaireName')      
               query.sort({
-                'createdAt': -1
+                'topicIndex': 1
               })   
 		          .exec(function (err, doc) {
 		            if (err) { 
@@ -822,7 +855,7 @@ export function fetchConferenceTopicContentData(req, res) {
             .select('topicName content questionnaire')
             .populate('createdBy',  'firstname lastname profile.profileImage')
             .populate('questionnaire.questionnaireId',  'questionnaireName')      
-            .sort({ 'createdAt': -1 })   
+            .sort({ 'topicIndex': 1 })   
             .exec(function (err, doc) {
               if (err) { 
                 res.json({ 
@@ -2482,7 +2515,7 @@ export function RemoveGuestFromRoom(req, res) {
   // console.log("req.body.data", req.body.data);
   // Verifying request is valid or not
   checkValidRequest(req.headers, function(person){
-    console.log("person type", person.guest);
+    // console.log("person type", person.guest);
     try {
         if (!req.body.data && !req.body.data.roomKey || person == null) {
           //console.log("person is null");

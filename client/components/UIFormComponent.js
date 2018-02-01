@@ -150,7 +150,11 @@ UIFORMComponent.propTypes = {
   loggedInData: PropTypes.object,
   data: PropTypes.object.isRequired,
   callback: PropTypes.func,
-  dataObject: PropTypes.object
+  // dataObject: PropTypes.object 
+  dataobject: React.PropTypes.oneOfType([
+      React.PropTypes.object,
+      React.PropTypes.array
+    ])
 };
 
 export default connect(mapStateToProps)(UIFORMComponent);

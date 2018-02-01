@@ -15,7 +15,7 @@ const LoginReducer = (state = initialState, action) => {
       return Object.assign({}, state, { status: action.status, token: action.token, data: action.data/*, error : action.error*/, socketServer: action.socketServer, ga_ui: action.ga_ui, iceServers: action.iceServers, isLoggingIn : action.status });
     }
     case LOGOUT_USER: 
-       return Object.assign({}, state, { isLoggingIn: false, status: false });
+       return Object.assign({}, state, { isLoggingIn: false, status: false, token: '' });
     case LOGGED_IN:
       return Object.assign({}, state, {
         status: action.status, isLoggingIn: false, token: action.token/*, error : action.error*/

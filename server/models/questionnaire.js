@@ -24,6 +24,18 @@ const userSchema = new Schema({
     set : addSlash,
     get : stripSlash
   },
+  questionnaireType: {
+    type: String,
+    required: false,
+    enum: ['regular', 'scorm'],
+    set: addSlash,
+    get: stripSlash,
+  },
+  scormId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: false,
+    ref: 'Uploads',
+  },
   //Commented the set and get for bug#3023(By: Prateek)
   questions: [
     {
@@ -37,7 +49,7 @@ const userSchema = new Schema({
       questionType : { 
         type: String,
         set : addSlash,
-        get : stripSlash 
+        get : stripSlash
       },
       answers : {
         type: Array 
@@ -66,7 +78,7 @@ const userSchema = new Schema({
   modifiedAt : { 
     type : Date, 
     default : moment().utc().toDate()
-  }  
+  }
 },{
     toObject : {getters: true},
     toJSON : {getters: true}

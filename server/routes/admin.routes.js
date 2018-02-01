@@ -73,6 +73,7 @@ adminRoute.route('/activate-user').put(UserController.activateUser);
 
 adminRoute.route('/create-guest').post(UserController.createGuest);
 adminRoute.route('/delete-guest/:roomkey').delete(UserController.deleteGuest);
+adminRoute.route('/clear-deviceId').get(UserController.clearDeviceid)
 
 
 adminRoute.route('/studentsGroup').post(GroupController.saveStudentsGroup);
@@ -194,7 +195,7 @@ adminRoute.route('/get-questionnaire-result/:id').get(QuestionnaireController.fe
 adminRoute.route('/delete-questionnaire/:id').delete(QuestionnaireController.deleteQuestionnaire);
 adminRoute.route('/confirm-delete-questionnaire/:id/:dependency').delete(QuestionnaireController.confirmDeleteQuestionnaire);
 adminRoute.route('/fetch-clone-questionnaire/:id').get(QuestionnaireController.fetchCloneQuestionnaire);
-
+adminRoute.route('/questionnaire-scorm-upload/:token').post(QuestionnaireController.uploadScormQuestionnaire);
 
 adminRoute.route('/delete-question/:qid/:id').delete(QuestionnaireController.deleteQuestion)
 adminRoute.route('/confirm-delete-question/:qid/:id').delete(QuestionnaireController.confirmedDeleteQuestion)
@@ -232,6 +233,8 @@ adminRoute.route('/set-deviceid-ios').post(MobileController.setDeviceIdIOS);
 
 adminRoute.route('/get-certificate-data').get(RoomController.listRoomCertificateData);
 adminRoute.route('/toggle-certificate-download').put(RoomController.toggleCertificateDownload);
+
+adminRoute.route('/set-index-topics').put(RoomController.setIndexTopics);
 
 
 function requirAuth (req, res, next) {

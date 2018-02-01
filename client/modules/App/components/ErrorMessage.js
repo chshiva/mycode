@@ -14,18 +14,18 @@ export function ErrorMessage(props, context) {
 			        <div className={styles.centerAligner}>
 			        	<Row>
 			        		<Col md={6}>
-										<div className={styles.goBackDash}>
-											<a href='/dashboard'><button> Back</button></a>
-										</div>
+								<div className={styles.goBackDash}>
+									<a href='/'><button> Back</button></a>
+								</div>
 			        			<div className={styles.errorIcon}>
 			        				<img src="/images/invalid.png" alt="Invalid request"/>
 			        			</div>
 			        		</Col>
-									<Col md={6}>
-										<div className={styles.goTextDash} >	
-											<h3>Oops! {_message}.</h3>
-											<p>Description goes here. {_message}.</p>
-										</div>	
+							<Col md={6}>
+								<div className={styles.goTextDash} >	
+									<h3>Oops! {_message}.</h3>
+									<p>Description goes here. {_message}.</p>
+								</div>	
 					        </Col>
 			        	</Row>
 			        </div>

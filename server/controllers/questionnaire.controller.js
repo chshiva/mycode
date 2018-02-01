@@ -12,14 +12,20 @@ import * as EmailForCorporateCreation from '../emailFunctions';
 import { Roles } from './admin.user.controller';
 import { checkValidRequest } from '../authorization';
 import {addSlash} from './slashesActions';
+import { createRandomString } from '../randomstring';
+import serverConfig from '../config';
+import Uploads from '../models/upload';
+import { isScormPackage, processScormPackage, deleteScormPackage } from './scorm.controller';
 
 var _ = require('lodash');
 var moment = require('moment');
 var mongoose = require('mongoose');
+var fs = require('fs');
 var validator = require('validator');
 var async = require("async");
 import reflect from 'async/reflect';
 import parallel from 'async/parallel';
+import formidable from 'formidable';
 
 
 /**
@@ -384,89 +390,93 @@ export function saveQuestion(req, res) {
               if (req.body.questionnaireData.data.question && req.body.questionnaireData.data.question.questionId == '') {
 
                 //Push questions object in questionnaire
-                Questionnaire.update({ 
-                  _id : recordId 
-                },{ 
-                  $push : {
-                    "questions":obj
-                  } 
-                },{ runValidators: true },function (err, doc) {
-                  // console.log("update err == ",err);
-                  // console.log("update doc == ",doc);
-                  if (err) {
-                    res.json({ 
-                      status : false, 
-                      error : err.message 
-                    });
-                  } else {
+                checkForImageVideoUploadContent(obj, function(modifiedResult){
+                  Questionnaire.update({ 
+                    _id : recordId 
+                  },{ 
+                    $push : {
+                      "questions":modifiedResult
+                    } 
+                  },{ runValidators: true },function (err, doc) {
+                    // console.log("update err == ",err);
+                    // console.log("update doc == ",doc);
+                    if (err) {
+                      res.json({ 
+                        status : false, 
+                        error : err.message 
+                      });
+                    } else {
 
-                    //Query for sending the updated record to the client
-                    var query = Questionnaire.findOne({ 
-                      _id : recordId 
-                    });
-                    query.exec(function (err, doc) {
-                      if (err) { 
-                        res.json({ 
-                          status: false 
-                        }); 
-                      } else {
-                        res.json({ 
-                          status: true, 
-                          data: doc, 
-                          message : "Added successfully." 
-                        });
-                      }
-                    });
-                  }
-                });
+                      //Query for sending the updated record to the client
+                      var query = Questionnaire.findOne({ 
+                        _id : recordId 
+                      });
+                      query.exec(function (err, doc) {
+                        if (err) { 
+                          res.json({ 
+                            status: false 
+                          }); 
+                        } else {
+                          res.json({ 
+                            status: true, 
+                            data: doc, 
+                            message : "Added successfully." 
+                          });
+                        }
+                      });
+                    }
+                  });
+                })
 
                 //If question object is there and question id is not empty then update question into questionnaire
               } else if (req.body.questionnaireData.data.question && req.body.questionnaireData.data.question.questionId != '') {
 
                 //Update questions object in questionnaire
-                Questionnaire.update({ 
-                  _id : recordId,
-                  "questions._id": obj.questionId 
-                },{ 
-                  $set : {
-                    "questions.$.question": obj.question,
-                    "questions.$.questionType": obj.questionType,
-                    "questions.$.options": obj.options,
-                    "questions.$.answers": obj.answers,
-                    "questions.$.swots": obj.swots,
-                    "questions.$.marks": obj.marks  
-                  } 
-                },{ 
-                  runValidators: true 
-                },function (err, doc) {
-                  // console.log("update err == ",err);
-                  // console.log("update doc == ",doc);
-                  if (err) {
-                    res.json({ 
-                      status : false, 
-                      error : err.message 
-                    });
-                  } else {
+                checkForImageVideoUploadContent(obj, function(modifiedResult){
+                  Questionnaire.update({ 
+                    _id : recordId,
+                    "questions._id": obj.questionId 
+                  },{ 
+                    $set : {
+                      "questions.$.question": modifiedResult.question,
+                      "questions.$.questionType": obj.questionType,
+                      "questions.$.options": obj.options,
+                      "questions.$.answers": obj.answers,
+                      "questions.$.swots": obj.swots,
+                      "questions.$.marks": obj.marks  
+                    } 
+                  },{ 
+                    runValidators: true 
+                  },function (err, doc) {
+                    // console.log("update err == ",err);
+                    // console.log("update doc == ",doc);
+                    if (err) {
+                      res.json({ 
+                        status : false, 
+                        error : err.message 
+                      });
+                    } else {
 
-                    //Query for sending the updated record to the client
-                    var query = Questionnaire.findOne({ 
-                      _id : recordId 
-                    });
-                    query.exec(function (err, doc) {
-                      if (err) { 
-                        res.json({ 
-                          status: false 
-                        }); 
-                      } else {
-                        res.json({ 
-                          status: true, 
-                          data: doc, 
-                          message : "Updated successfully." 
-                        });
-                      }
-                    });
-                  }
-                });
+                      //Query for sending the updated record to the client
+                      var query = Questionnaire.findOne({ 
+                        _id : recordId 
+                      });
+                      query.exec(function (err, doc) {
+                        if (err) { 
+                          res.json({ 
+                            status: false 
+                          }); 
+                        } else {
+                          res.json({ 
+                            status: true, 
+                            data: doc, 
+                            message : "Updated successfully." 
+                          });
+                        }
+                      });
+                    }
+                  });
+                })
               } 
             } else {
               res.json({ 
@@ -496,6 +506,49 @@ export function saveQuestion(req, res) {
     }
   });
 } 
+
+function checkForImageVideoUploadContent(obj, cb) {
+  let question = obj.question;
+  async.forEach(question, (questionData) => {
+    // console.log('questionData', questionData);
+    if(typeof questionData.insert === 'object' && !_.has(questionData.insert, 'formula')) {
+      
+      createRandomString(function(generatedRandomString) {
+        let dest = '';
+        let insertObj = '';
+        let data = '';    
+        let domain = serverConfig.domin.startsWith('https')?serverConfig.domin:('https://'+serverConfig.domin);               
+        if(_.has(questionData.insert, 'image') && questionData.insert.image.startsWith('data:image')) {
+          dest = process.env.PWD+"/uploads/quill_"+generatedRandomString+".png";
+          insertObj = questionData.insert.image;        
+          data = insertObj.replace(/^data:image\/\w+;base64,/, "");                                                      
+          questionData.insert = {
+            image : domain+"/uploads/quill_"+generatedRandomString+".png"
+          }  
+          let buf = new Buffer(data, 'base64');
+          fs.writeFile(dest, buf, (err) => {
+            if (err) throw err         
+          });            
+        } else if(_.has(questionData.insert, 'video') && questionData.insert.video.startsWith('data:video')) {
+          dest = process.env.PWD+"/uploads/quill_"+generatedRandomString+".mp4";
+          insertObj = questionData.insert.video;        
+          data = insertObj.replace(/^data:video\/\w+;base64,/, "");
+          questionData.insert = {
+            video : domain+"/uploads/quill_"+generatedRandomString+".mp4"
+          } 
+          let buf = new Buffer(data, 'base64');
+          fs.writeFile(dest, buf, (err) => {
+            if (err) {
+              console.log('err', err.message)
+            }
+            // throw err         
+          });
+        }          
+      })
+    }
+  }) 
+  cb(obj)
+}
 
 /**
 *  @Function name : listQuestionnaire
@@ -556,7 +609,7 @@ export function listQuestionnaire(req, res) {
         if (query) {                
           query.exec(function(err, result) {
             if (err) {
-              // console.log("ERROR===", err);
+              console.log("ERROR===", err.message);
               res.json({ 
                 status : false, 
                 error : err.message 
@@ -624,6 +677,7 @@ export function fetchQuestionnaire(req, res) {
           var query = Questionnaire.findOne({ 
             _id : req.params.id 
           })
+          .populate('scormId','fileName')
           .exec(function (err, doc) {
             if (err) { 
               res.json({ 
@@ -857,10 +911,26 @@ export function deleteQuestionnaire(req, res) {
                               error : error.message 
                             }); 
                           } else {
-                            res.json({ 
-                              status : true, 
-                              message : "Deleted successfully." 
-                            });
+                            if(doc.questionnaireType === 'scorm'){
+                              deleteScormPackage(doc.scormId, (success) => {
+                                if (success) {
+                                  res.json({ 
+                                    status : true, 
+                                    message : "Deleted successfully." 
+                                  });
+                                } else {
+                                  res.json({ 
+                                    status : false, 
+                                    error : 'Unable to delete SCORM package from server' 
+                                  }); 
+                                }
+                              });
+                            } else {
+                              res.json({ 
+                                status : true, 
+                                message : "Deleted successfully." 
+                              });
+                            }
                           }
                         })
                       }                     
@@ -1644,5 +1714,131 @@ export function fetchCloneQuestionnaire(req, res) {
   });
 }
 
+/**
+*  @Function name : uploadScormQuestionnaire
+*  @Purpose : For uploading SCORM package as questionnaire
+*  @Response Object : Success - Questionnaire data, Failure - Error message
+*  @Author : Shantanu Paul
+*/
+export function uploadScormQuestionnaire(req, res) {
+  if (req.params.token) {
+    let userQuery = Users.findOne({ token: req.params.token });
+    userQuery.exec(function (errPerson, person) {
+      if(errPerson) { 
+        throw errPerson
+      }
+      else if (!person || !req.body) {
+        res.json({ status: false, error: 'Invalid request' });
+      } else {
+        let status  = false;
+        var uploadObj = req.params;
+        var quesitonnaireObj = {};
+        delete uploadObj["token"];
 
+        var form = new formidable.IncomingForm();
+        form.uploadDir = process.env.PWD + "/uploads";
+        form.multiples = true;
+
+        form.on('field', function(field, value) {
+          if(field === 'name') {
+            quesitonnaireObj['questionnaireName'] = value;
+          } else if(field === 'description') {
+            quesitonnaireObj['description'] = value;
+          }
+        });
+
+        form.on('file', function(field, file) {
+          var randomstring = '';
+          //Function call for creating randomstring
+          createRandomString(function (data) {
+            randomstring = data
+          });
+
+          // For removing spaces, parantheses in filename
+          var fileName = file.name.replace(/[ )(]+/g, '');
+
+          let newFileName = randomstring + "_" + fileName;
+          uploadObj['fileName'] = newFileName;
+          
+          fs.renameSync(file.path, form.uploadDir + "/" + newFileName);
+
+          if (!isScormPackage(uploadObj.fileName)) {
+            res.json({
+              status: false,
+              error: "Not a valid SCORM package."
+            });
+          }
+          else if (uploadObj.fileSize > 155000000) {
+            console.log("Topic upload - File Size exceeded");
+            res.json({
+              status: false,
+              error: "File Size should be less than 100MB."
+            });
+          } else {
+            status = true;
+          }
+
+          form.on('end', function () {
+            if (status) {
+              const now = moment().utc().toDate();
+              const id = mongoose.Types.ObjectId(person._id);
+
+              let scormData = processScormPackage(uploadObj.fileName);
+              uploadObj['createdAt'] = now;
+              uploadObj['createdBy'] = id
+              uploadObj['isEnable'] = true;
+              uploadObj['fileType'] = 'zip/scorm';
+              uploadObj['_id'] = scormData.packageId;
+              uploadObj['scormApiVersion'] = scormData.scormVersion;
+            
+
+              quesitonnaireObj['corporateId'] = person.profile.companyid;
+              quesitonnaireObj['createdAt'] = now;
+              quesitonnaireObj['modifiedAt'] = now;
+              quesitonnaireObj['createdBy'] = id;
+              quesitonnaireObj['modifiedBy'] = id;
+              quesitonnaireObj['questionnaireType'] = 'scorm';
+              quesitonnaireObj['scormId'] = uploadObj._id;
+
+              const objUpload = new Uploads(uploadObj);
+              const objQuestionnaire = new Questionnaire(quesitonnaireObj);
+
+              Uploads.create([objUpload], (err) => {
+                if (!err) {
+                  Questionnaire.create([objQuestionnaire], (err, data)=> {
+                    if(!err) {
+                      res.json({
+                        status: true,
+                        data: data[0],
+                      });
+                    } else {
+                      console.log(err);
+                      res.json({
+                        status: false,
+                        error: 'Error saving questionnaire.',
+                      });
+                    }
+                  });
+                } else {
+                  res.json({
+                    status: false,
+                    error: 'Upload not Done.',
+                  });
+                }
+              });
+             }
+          });
+          form.on('error', function (err) {
+            console.log('An error has occured: \n' + err);
+            res.json({
+              status: false,
+              error: err,
+            });
+          });
+        });
+        form.parse(req);
+      }
+    });
+  }
+}
 

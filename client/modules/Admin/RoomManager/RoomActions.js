@@ -2294,3 +2294,12 @@ export function handleToggleCertificateDownload(response) {
     }
   }
 }
+
+export function setTopicsIndex(topicData) {
+   return (dispatch) => {
+    return callApi('set-index-topics', 'put',{
+      topicData
+    });
+  }
+}
+

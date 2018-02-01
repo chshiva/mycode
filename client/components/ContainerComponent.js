@@ -115,7 +115,11 @@ ContainerComponent.propTypes = {
   submenu: PropTypes.object,
   topmenu: PropTypes.object,
   clear: PropTypes.func,
-  dataobject: PropTypes.object,
+  // dataobject: PropTypes.object ,
+  dataobject: React.PropTypes.oneOfType([
+      React.PropTypes.object,
+      React.PropTypes.array
+    ]),
   dataFun: PropTypes.func,
 };
 

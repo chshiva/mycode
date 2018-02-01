@@ -383,6 +383,10 @@ export class Conference extends Component {
             return (
               <ErrorMessage message="invalid_or_expire_package" />
             );
+          } else if (conferenceDetails.confData && conferenceDetails.confData.serverResponse != undefined && conferenceDetails.confData.serverResponse == false) {
+            return (
+              <ErrorMessage message="mcu_server_down" />
+            );
           } else if (conferenceDetails.confData && conferenceDetails.confData.validCPLimit != undefined && conferenceDetails.confData.validCPLimit == false) {
             return (
               <ErrorMessage message="continous_user_presence_exceeded" />

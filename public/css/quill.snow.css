@@ -384,6 +384,10 @@
 .ql-snow .ql-toolbar input.ql-image[type=file] {
   display: none;
 }
+.ql-snow.ql-toolbar input.ql-video[type=file],
+.ql-snow .ql-toolbar input.ql-video[type=file] {
+  display: none;
+}
 .ql-snow.ql-toolbar button:hover,
 .ql-snow .ql-toolbar button:hover,
 .ql-snow.ql-toolbar button.ql-active,

@@ -12,6 +12,7 @@ import AnalyticsManager from '../../../Communication/Analytics';
 import callApi from '../../../../util/apiCaller';
 import { conferenceDetails } from '../../../Communication/ConferenceReducer';
 import { loginLanguage } from '../../../Intl/IntlActions';
+import Cookies from 'js-cookie';
 
 export function Header(props, context) {
   if(props && props.loggedStatus && props.loggedStatus.status) {
@@ -34,9 +35,12 @@ export function Header(props, context) {
             WoogeenObject.endConference();
             store.dispatch(loginLanguage(props.loggedStatus.data, null));
             store.dispatch( ClearImage());
+            callApi ('clear-deviceId', 'get');
             //store.dispatch( logoutUser()); 
             AuthClient.deleteSession();
-            browserHistory.push('/');           
+            if(Cookies.get("token") == undefined || Cookies.get("token") == "" ){ 
+              browserHistory.push('/'); 
+            }         
           }
         },
         function() { }
@@ -47,9 +51,12 @@ export function Header(props, context) {
       };
       store.dispatch(loginLanguage(props.loggedStatus.data, null));
       store.dispatch(ClearImage());
+      callApi ('clear-deviceId', 'get');
       //store.dispatch( logoutUser());  
       AuthClient.deleteSession();
-      browserHistory.push('/');
+      if(Cookies.get("token") == undefined || Cookies.get("token") == "" ){ 
+        browserHistory.push('/'); 
+      } 
     }
   }
   
@@ -147,7 +154,7 @@ export function Header(props, context) {
           </div>}
         </div>
       </div>
-    );
+    );  
   }else{
     return (<div></div>);
   }

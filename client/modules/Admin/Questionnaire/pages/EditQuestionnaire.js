@@ -12,7 +12,7 @@ import { questionnaireData } from '../QuestionnaireReducer';
 import Validator from '../../../../components/Validator';
 import ContainerComponent from '../../../../components/ContainerComponent';
 import {editQuestionnaireSchema} from '../schema/QuestionnaireSchema';
-import {questionnaireEditSubMenu, questionnaireEditMainMenu} from '../schema/QuestionnaireMenu';
+import {questionnaireEditSubMenu, questionnaireEditMainMenu, scormQuestionnaireEditSubMenu } from '../schema/QuestionnaireMenu';
 import  {ToastContainer, ToastMessage} from '../../../../lib';
 const ToastMessageFactory = React.createFactory(ToastMessage.animation);
 
@@ -46,31 +46,31 @@ class EditQuestionnaire extends Component {
     this.form = {};
     this.datareceive = this.datareceive.bind(this);
     this.schema = editQuestionnaireSchema;
-    this.res = {};     
+    this.res = {};
     this.mainmenu = questionnaireEditMainMenu;
     this.submenu = Validator.activeSubMenu(questionnaireEditSubMenu, "lnkViewQuestionnaire");
     this.submenu.menus[0].action = this.viewQuestionnaire.bind(this);
     this.submenu.menus[1].action = this.viewQuestions.bind(this);
     this.mainmenu.menus[1].action = this.save.bind(this);//this.save.bind(this);
-    
+
   }
 
   // componentWillMount() {
   //   var roomId = this.props.params.cid;
-  //   this.props.dispatch(isLoggedIn(AuthClient.getSession(), 
+  //   this.props.dispatch(isLoggedIn(AuthClient.getSession(),
   //                       '/admin/room/edit/'+roomId)).then(res => this.setuserdata(res));
   // }
 
   componentDidMount() {
     this.setuserdata(this.props.loggedInData);
   }
-  
+
   setuserdata(result){
     //console.log("result === ",result);
     if (result && result.data && result.data._id) {
       this.props.dispatch(loginLanguage(result.data, this.props.intlData.setlocale));
       var questionnaireId = this.props.params.cid;
-      let obj = { 
+      let obj = {
         // uid : result.data._id,
         questionnaireId : questionnaireId
       };
@@ -127,7 +127,7 @@ class EditQuestionnaire extends Component {
     let errors = {};
     if(this.state.questionnaireName == "") {
       errors['nameError'] = <FormattedMessage id='questionnaire_name_error' />;
-    } 
+    }
     if(this.state.description == "" ) {
        errors['descriptionError'] = <FormattedMessage id='questionnaire_description_error' />;
     }
@@ -162,7 +162,7 @@ class EditQuestionnaire extends Component {
     //   this.schema = response.schema;
     //   this.props.dispatch(UpdateQuestionnaireSchema(this.schema));
     // }else{
-      
+
     // }
   }
 
@@ -177,9 +177,9 @@ class EditQuestionnaire extends Component {
         this.refs.questionnaire_container.error("Can't Edit: Already questionnaire is assigned from " + moment(response.openFrom).format("DD/MM/YYYY hh:mm A") + " " + "to" + " " + moment(response.closeFrom).format("DD/MM/YYYY hh:mm A"));
         this.form["_id"] = this.props.params.cid
       } else if(response.error[0] == 409 && response.openFrom == undefined) {
-        this.refs.questionnaire_container.error("Can't Edit: Already questionnaire is assigned");        
+        this.refs.questionnaire_container.error("Can't Edit: Already questionnaire is assigned");
       } else {
-        this.refs.questionnaire_container.error(`${response.error} `, ``);        
+        this.refs.questionnaire_container.error(`${response.error} `, ``);
       }
     }
   }
@@ -201,9 +201,9 @@ class EditQuestionnaire extends Component {
 
   handleKeyPress(e) {
     if(e.key == 'Enter') {
-      e.preventDefault(); 
-      e.stopPropagation(); 
-    } 
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
 
   render() {
@@ -225,12 +225,16 @@ class EditQuestionnaire extends Component {
         // console.log(strName);
     }
 */
+    this.submenu = this.props.questionnaireData.data.questionnaireType === 'scorm' ?
+    scormQuestionnaireEditSubMenu :
+    Validator.activeSubMenu(questionnaireEditSubMenu, "lnkViewQuestionnaire");
+
     let clsContainerRight = `${styles.containerRight} pull-right`;
     let cls_topmenu = `${componentStyles.iTopMenu} ${componentStyles.oTopMenu}`;
     let clsForm   = `${componentStyles.iForm} ${componentStyles.oForm}`;
     let cls = `${componentStyles.iFormField} ${componentStyles.oFormField}`;
     let errcls = `${componentStyles.error}`;
-    let cls_isubmenu = `${componentStyles.iSubMenu} ${componentStyles.oSubMenu}`; 
+    let cls_isubmenu = `${componentStyles.iSubMenu} ${componentStyles.oSubMenu}`;
     let cls_container = `${componentStyles.iContainer} ${componentStyles.oContainer} pull-right`;
     let cls_group = `${componentStyles.iFormGroup} ${componentStyles.oFormGroup}`;
     let cls_fg = `${componentStyles.iSubFormGroup} ${componentStyles.oSubFormGroup}`;
@@ -238,7 +242,7 @@ class EditQuestionnaire extends Component {
     let cls_error_element = `${componentStyles.iElement} ${componentStyles.oElement} ${componentStyles.errorclass}`;
 
     if(this.props.questionnaireData && this.props.questionnaireData.data){
-            
+
       return (
         <div className={cls_container}>
           <ToastContainer
@@ -273,30 +277,33 @@ class EditQuestionnaire extends Component {
                         <div className={cls}>
                           <formfield>
                             <Label data={{text: <FormattedMessage id ="questionnaire_name"/> }} required={true} />
-                            <input id="questionnaire_name" ref="questionnari_name" type="text" 
-                              className={this.state.validationError && this.state.validationError.nameError ? cls_error_element : cls_element} 
-                              placeholder="Questionnaire Name" 
+                            <input id="questionnaire_name" ref="questionnari_name" type="text"
+                              className={this.state.validationError && this.state.validationError.nameError ? cls_error_element : cls_element}
+                              placeholder="Questionnaire Name"
                               onChange={this.handleName.bind(this)}
                               onKeyDown={this.handleKeyPress.bind(this)}
                               value = {this.state.questionnaireName}
                               maxLength = {250}/>
-                            <label id="questionnaireNameError" className={errcls} >{this.state.validationError && this.state.validationError.nameError ? this.state.validationError.nameError : ''}</label>  
+                            <label id="questionnaireNameError" className={errcls} >{this.state.validationError && this.state.validationError.nameError ? this.state.validationError.nameError : ''}</label>
                           </formfield>
                         </div>
-                        <div className={cls}>
-                          <formfield>
-                            <input type="checkbox" 
-                             onChange={this.handleToggleChange.bind(this)}
-                             checked={this.state.isChecked}
-                             />&nbsp;
-                            {this.props.intlData.messages.clone_from_previoues_questionnaire}
-                          </formfield>
-                        </div>
+                        {
+                          this.props.questionnaireData.data.questionnaireType === 'scorm' ? null :
+                          <div className={cls}>
+                            <formfield>
+                              <input type="checkbox"
+                              onChange={this.handleToggleChange.bind(this)}
+                              checked={this.state.isChecked}
+                              />&nbsp;
+                              {this.props.intlData.messages.clone_from_previoues_questionnaire}
+                            </formfield>
+                          </div>
+                        }
                         {
                           this.state.isChecked == true ?
                             <div className={cls}>
                                <formfield>
-                                 <select id="selectQuestionnaire" className={this.state.validationError && this.state.validationError.selectQidError ? cls_error_element : cls_element} 
+                                 <select id="selectQuestionnaire" className={this.state.validationError && this.state.validationError.selectQidError ? cls_error_element : cls_element}
                                    onChange={this.handleQuestionnaire.bind(this)} >
                                   {
                                     this.props.questionnaireData && this.props.questionnaireData.questionnaireCloneData &&  this.props.questionnaireData.questionnaireCloneData.length > 0?
@@ -306,10 +313,10 @@ class EditQuestionnaire extends Component {
                                       : null
                                     }
                                 </select>
-                                <label id="questionnaireDropdownError" className={errcls} >{this.state.isChecked && this.state.validationError && this.state.validationError.selectQidError ? this.state.validationError.selectQidError : ''}</label>  
+                                <label id="questionnaireDropdownError" className={errcls} >{this.state.isChecked && this.state.validationError && this.state.validationError.selectQidError ? this.state.validationError.selectQidError : ''}</label>
                              </formfield>
                             </div>
-                          : 
+                          :
                           null
                       }
                       </div>
@@ -326,11 +333,17 @@ class EditQuestionnaire extends Component {
                               className={this.state.validationError && this.state.validationError.descriptionError ? cls_error_element : cls_element}
                               placeholder="Description"
                               onChange={this.handleDescription.bind(this)}
-                              value = {this.state.description} 
+                              value = {this.state.description}
                               maxLength = {250}/>
-                            <label id="DescriptionError" className={errcls} >{this.state.validationError && this.state.validationError.descriptionError ? this.state.validationError.descriptionError : ''}</label>  
+                            <label id="DescriptionError" className={errcls} >{this.state.validationError && this.state.validationError.descriptionError ? this.state.validationError.descriptionError : ''}</label>
                           </formfield>
                         </div>
+                        {this.props.questionnaireData.data.questionnaireType === 'scorm' && this.props.questionnaireData.data['scormId.fileName'] ?
+                          <div className={cls}>
+                          <Label data={{text: <FormattedMessage id ="scorm_filename"/> }} required={false} />
+                              <div>{this.props.questionnaireData.data['scormId.fileName'].split('_')[1]} </div>
+                          </div> : null
+                        }
                       </div>
                     </div>
                   </div>
@@ -339,7 +352,7 @@ class EditQuestionnaire extends Component {
             </Grid>
           </div>
         </div>
-                
+
 
 
 

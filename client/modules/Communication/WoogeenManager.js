@@ -734,10 +734,14 @@ export default class WoogeenManager {
           };
         this.sendMessage( presenterobj, 0);*/
         let objEntity = {
-          current: store.getState().workDashboard.current, topicContent: store.getState().workDashboard.topicContent, topicList: store.getState().workDashboard.topicList, tid: store.getState().workDashboard.tid,
-          conductQuestion: store.getState().workDashboard.conductQuestion, questionnaireId: store.getState().workDashboard.questionnaireId, questionnaireName: store.getState().workDashboard.questionnaireName, pdfView: store.getState().workDashboard.pdfView, fileId: store.getState().workDashboard.fileId,
-          sync: false, ssPdfView: store.getState().workDashboard.ssPdfView, pdfFileName: store.getState().workDashboard.pdfFileName, whiteBoardData: store.getState().workDashboard.whiteBoardData, waitforview: store.getState().workDashboard.waitforview
+          current: store.getState().workDashboard.current, topicList: store.getState().workDashboard.topicList, topicContent: store.getState().workDashboard.topicContent, tid: store.getState().workDashboard.tid,
+          conductQuestion: store.getState().workDashboard.conductQuestion, questionnaireId: store.getState().workDashboard.questionnaireId, questionnaireName: store.getState().workDashboard.questionnaireName,
+          pdfView: store.getState().workDashboard.pdfView, fileId: store.getState().workDashboard.fileId,
+          sync: store.getState().workDashboard.sync, ssPdfView: store.getState().workDashboard.ssPdfView, pdfFileName: store.getState().workDashboard.pdfFileName, whiteBoardData: store.getState().workDashboard.whiteBoardData,
+          waitforview: store.getState().workDashboard.waitforview, topicContentDataDetails : store.getState().workDashboard.topicContentDataDetails,
+          scormView: store.getState().workDashboard.scormView, scormFileName: store.getState().workDashboard.scormFileName
         }
+
         if (objEntity.current == "handraise") {
           objEntity['handraiseCount'] = 0;
           objEntity['handraiseupdates'] = false;
@@ -745,7 +749,7 @@ export default class WoogeenManager {
           objEntity['roomCount'] = 0;
         else if (objEntity.current == 'screenshare') {
           objEntity['ssNotification'] = false;
-          objEntity['showButtons'] = store.getState().workDashboard.showButtons;
+          objEntity['showButtons'] = true;
         }
         let obj = {
           command: 'SYNC-REQ',
@@ -774,6 +778,21 @@ export default class WoogeenManager {
           type: 'OBJECT'
         };
         this.sendMessage(shareObj, 0);
+        let objEntity = {
+          current: store.getState().workDashboard.current
+        };
+        if (objEntity.current == 'screenshare') {
+          objEntity['ssNotification'] = false;
+          objEntity['showButtons'] = true;
+        }
+        
+        let obj = {
+          command: 'SYNC-REQ',
+          content: { data: objEntity },
+          type: 'OBJECT'
+        };
+        // this.props.dispatch(setWorkDashboard({sync : !this.props.workDashboardData.sync}));
+        this.sendMessage(obj, 0);
         /*let presenterobj = {
             command : 'PRESENTER-OFF',
             content : { presenter: '' },
@@ -1068,7 +1087,8 @@ export default class WoogeenManager {
             conductQuestion: store.getState().workDashboard.conductQuestion, questionnaireId: store.getState().workDashboard.questionnaireId, questionnaireName: store.getState().workDashboard.questionnaireName,
             pdfView: store.getState().workDashboard.pdfView, fileId: store.getState().workDashboard.fileId,
             sync: store.getState().workDashboard.sync, ssPdfView: store.getState().workDashboard.ssPdfView, pdfFileName: store.getState().workDashboard.pdfFileName, whiteBoardData: store.getState().workDashboard.whiteBoardData,
-            waitforview: store.getState().workDashboard.waitforview
+            waitforview: store.getState().workDashboard.waitforview, topicContentDataDetails : store.getState().workDashboard.topicContentDataDetails,
+            scormView: store.getState().workDashboard.scormView, scormFileName: store.getState().workDashboard.scormFileName
           }
           if (current == "handraise") {
             objEntity['handraiseCount'] = 0;
@@ -2447,8 +2467,9 @@ if(defIndex > -1){
       let objEntity = {
         current: store.getState().workDashboard.current, topicList: store.getState().workDashboard.topicList, topicContent: store.getState().workDashboard.topicContent, tid: store.getState().workDashboard.tid,
         conductQuestion: store.getState().workDashboard.conductQuestion, questionnaireId: store.getState().workDashboard.questionnaireId, questionnaireName: store.getState().workDashboard.questionnaireName,
-        pdfView: store.getState().workDashboard.pdfView, fileId: store.getState().workDashboard.fileId,
-        sync: status, ssPdfView: store.getState().workDashboard.ssPdfView, pdfFileName: store.getState().workDashboard.pdfFileName, waitforview: store.getState().workDashboard.waitforview
+        pdfView: store.getState().workDashboard.pdfView, fileId: store.getState().workDashboard.fileId, topicContentDataDetails : store.getState().workDashboard.topicContentDataDetails,
+        sync: status, ssPdfView: store.getState().workDashboard.ssPdfView, pdfFileName: store.getState().workDashboard.pdfFileName, waitforview: store.getState().workDashboard.waitforview,
+        scormView: store.getState().workDashboard.scormView, scormFileName: store.getState().workDashboard.scormFileName
       }            
       if (status == false && store.getState().workDashboard.sync == true) {
         objEntity['ssPdfView'] = false;
@@ -2491,8 +2512,9 @@ if(defIndex > -1){
       let objEntity = {
         current: store.getState().workDashboard.current, topicList: store.getState().workDashboard.topicList, topicContent: store.getState().workDashboard.topicContent, tid: store.getState().workDashboard.tid,
         conductQuestion: store.getState().workDashboard.conductQuestion, questionnaireId: store.getState().workDashboard.questionnaireId, questionnaireName: store.getState().workDashboard.questionnaireName,
-        pdfView: store.getState().workDashboard.pdfView, fileId: store.getState().workDashboard.fileId,
-        sync: status, ssPdfView: false, pdfFileName: "", waitforview: store.getState().workDashboard.waitforview, showButtons : true
+        pdfView: store.getState().workDashboard.pdfView, fileId: store.getState().workDashboard.fileId, topicContentDataDetails : store.getState().workDashboard.topicContentDataDetails,
+        sync: status, ssPdfView: false, pdfFileName: "", waitforview: store.getState().workDashboard.waitforview, showButtons : true,
+        scormView: store.getState().workDashboard.scormView, scormFileName: store.getState().workDashboard.scormFileName
       }
       let obj = {
         command: 'SYNC-REQ',

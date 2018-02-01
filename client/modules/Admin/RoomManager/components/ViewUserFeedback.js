@@ -11,6 +11,7 @@ const ToastMessageFactory = React.createFactory(ToastMessage.animation);
 import { Roles } from '../../../../roles.js';
 var _ = require('lodash');
 import Loading from '../../../App/components/Loading';
+import RenderQuestions from '../../Questionnaire/components/RenderQuestions.js';
 
 export class ViewUserFeedback extends Component {
 
@@ -28,44 +29,67 @@ export class ViewUserFeedback extends Component {
     /*let cls_inlineEditGroup = `${styles.inlineEditGroupFlex} clearfix`;*/
     let cls_fdListBlock = `${styles.fdListBlock} clearfix`;
     let givenFeedback = [];
-    for(var list in feedback) {
+    feedback.map(function(feedbackData) {
       let randomNumber = Math.floor(Math.random(0-9)*1000*2);
-      if(feedback.hasOwnProperty(list)){
-        var regex = new RegExp('Unicode46','g');
-        var dotIndex = list.search(regex);
-        var dollarIndex = list.search('Unicode36');
-        
-        if(dotIndex != -1) {
-          var replacedQuestion = list.replace(regex, '.');
-          if(dollarIndex == 0) {
-            replacedQuestion = replacedQuestion.replace('Unicode36', '$');
-          }
-          feedback[replacedQuestion] = feedback[list] ;
-          delete feedback[list];         
-        } else if(dollarIndex == 0) {
-          var replacedQuestion = list.replace('Unicode36', '$');
-          feedback[replacedQuestion] = feedback[list] ;
-          delete feedback[list]          
-        }
-        //Changes made by prateek just to handle previous records
-        givenFeedback.push(<div className={cls_fdListBlock} key={randomNumber}>
-           <label htmlFor={list} className={styles.fdQues}>{list}:</label>
-           <ul className={styles.fdAns}>
-              {typeof feedback[list] == 'object'
+      givenFeedback.push(
+        <div className={cls_fdListBlock} key={randomNumber}>
+          <label htmlFor={feedbackData.question} className={styles.fdQues}>
+            <RenderQuestions question={feedbackData.question} />
+          </label>
+            <ul className={styles.fdAns}>
+              {typeof feedbackData.answer == 'object'
               ?
-                feedback[list].length > 0
+                feedbackData.answer.length > 0
                 ?
-                feedback[list].map((answeredOption,i) => {
-                  return <li key={i} className={styles.labelResultFlex}>{feedback[list][i]}</li>
+                feedbackData.answer .map((answeredOption, i) => {
+                  return <li key={i} className={styles.labelResultFlex}>{answeredOption}</li>
                 })
                 :
-                <li>{feedback[list][0]}</li>
-              :<li>{feedback[list]}</li>}
-           </ul>
-         </div>
-        );        
-      }
-    }
+                <li>{feedbackData.answer}</li>
+              :<li>{feedbackData.answer}</li>}
+            </ul>
+          </div>
+      )      
+    })
+    // for(var list in feedback) {
+    //   let randomNumber = Math.floor(Math.random(0-9)*1000*2);
+    //   if(feedback.hasOwnProperty(list)){
+    //     var regex = new RegExp('Unicode46','g');
+    //     var dotIndex = list.search(regex);
+    //     var dollarIndex = list.search('Unicode36');
+        
+    //     if(dotIndex != -1) {
+    //       var replacedQuestion = list.replace(regex, '.');
+    //       if(dollarIndex == 0) {
+    //         replacedQuestion = replacedQuestion.replace('Unicode36', '$');
+    //       }
+    //       feedback[replacedQuestion] = feedback[list] ;
+    //       delete feedback[list];         
+    //     } else if(dollarIndex == 0) {
+    //       var replacedQuestion = list.replace('Unicode36', '$');
+    //       feedback[replacedQuestion] = feedback[list] ;
+    //       delete feedback[list]          
+    //     }
+    //     //Changes made by prateek just to handle previous records
+    //     givenFeedback.push(
+            // <div className={cls_fdListBlock} key={randomNumber}>
+    //        <label htmlFor={list} className={styles.fdQues}>{list}:</label>
+    //        <ul className={styles.fdAns}>
+    //           {typeof feedback[list] == 'object'
+    //           ?
+    //             feedback[list].length > 0
+    //             ?
+    //             feedback[list].map((answeredOption,i) => {
+    //               return <li key={i} className={styles.labelResultFlex}>{feedback[list][i]}</li>
+    //             })
+    //             :
+    //             <li>{feedback[list][0]}</li>
+    //           :<li>{feedback[list]}</li>}
+    //        </ul>
+    //      </div>
+    //     );        
+    //   }
+    // }
     return givenFeedback;
   }
 
@@ -141,7 +165,7 @@ ViewUserFeedback.contextTypes = {
 
 ViewUserFeedback.propTypes = {
   roomdata: PropTypes.object,
-  userFeedbackData: PropTypes.object,
+  userFeedbackData: PropTypes.array,
   intl: PropTypes.object,
   error : PropTypes.array,
   success : PropTypes.string,

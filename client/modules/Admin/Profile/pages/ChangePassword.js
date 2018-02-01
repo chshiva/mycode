@@ -87,7 +87,8 @@ class ChangePassword extends Component {
     }else{
       if(res.error && res.error.length > 0){
         let errors = this.state.validationError;
-        errors['reNewPassword'] = res.error;
+        let label = res.label;
+        errors[label] = res.error;
         this.setState({validationError:errors})
         // this.refs.container.error(`${res.error} `, ``);
       }
