@@ -1,21 +1,31 @@
 'use strict';
 const webpack = require('webpack');
 const path = require('path');
+
+
 const CURRENT_WORKING_DIR = process.cwd();
-// const Dotenv = require('dotenv-webpack');
 
 const config = {
     context: path.resolve(CURRENT_WORKING_DIR, 'src'),
-    entry: './app.js',
+    entry: {
+        app: [
+            'babel-polyfill',
+            'webpack-hot-middleware/client', // bundle the client for hot reloading
+            'react-hot-loader/patch',   // activate HMR for React
+            './app.js'  // the entry point of app
+        ]
+    },
     output: {
-        path: path.resolve(CURRENT_WORKING_DIR, 'public'),
+        path: path.resolve(CURRENT_WORKING_DIR, 'dist'), //  destination
         filename: 'client.bundle.js',
-        publicPath: '/public/'
+        publicPath: '/dist/'
     },
-    devServer: {
-        port: 8001,
-        historyApiFallback: true
-    },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin(), // enable HMR globally
+        new webpack.NamedModulesPlugin(), // prints more readable module names in the browser console on HMR updates
+        new webpack.NoEmitOnErrorsPlugin(),  // do not emit compiled assets that include errors
+    ],
+    
     module: {
         rules: [
             {
@@ -26,15 +36,27 @@ const config = {
             {
                 test: /\.scss$/,
                 use: [
-                    { loader: 'style-loader' }, // creates style nodes from JS strings
-                    { loader: 'css-loader' }, // translates CSS into CommonJS
-                    { loader: 'sass-loader' }, // compiles Sass to CSS
+                    {
+                        loader: 'style-loader' // creates style nodes from JS strings
+                    },
+                    {
+                        loader: 'css-loader' // translates CSS into CommonJS
+                    },
+                    {
+                        loader: 'sass-loader' // compiles Sass to CSS
+                    }
                 ]
             },
             {
                 test: /\.css$/,
-                use: [{ loader: 'style-loader' },
-                { loader: 'css-loader' }]
+                use: [
+                    {
+                        loader: 'style-loader'
+                    },
+                    {
+                        loader: 'css-loader'
+                    }
+                ]
             },
             {
                 test: /\.(woff2?|ttf|eot|svg|jpg|png)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -46,14 +68,7 @@ const config = {
         modules: ['node_modules', 'app'],
         extensions: ['.js', '.jsx', '.json', '.css']
     },
-    devtool: "source-map",
-    plugins: [
-        new webpack.DefinePlugin({
-            'process.env': {
-              'API_URL': JSON.stringify('http://localhost:8000')
-            }
-          })
-    ]
+    devtool: "source-map"
 };
 
 module.exports = config;

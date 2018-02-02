@@ -16,9 +16,5 @@ const routes = [
                     component: Cart
                }
           ]
-     },
-     {
-          path: '/signup',
-          component: RegistrationContainer
      }
 ]

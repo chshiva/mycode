@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 
 // Import custom components
-import Header from './header/header';
+import Header from './header/Header';
 
 const styles = theme => ({
      root: {

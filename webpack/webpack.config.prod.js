@@ -2,25 +2,29 @@
 const webpack = require('webpack');
 const path = require('path');
 const env = process.env.NODE_ENV;
-const Dotenv = require('dotenv-webpack');
+
 
 const CURRENT_WORKING_DIR = process.cwd();
 
 var config = {
-    context: path.resolve(CURRENT_WORKING_DIR, 'src'),
-    entry: './app.js',
+    context: path.resolve(CURRENT_WORKING_DIR, 'client'),
+    entry: {
+        app: [
+            './main.js'
+        ]
+    },
     output: {
-        path: path.resolve(CURRENT_WORKING_DIR, 'public'),
+        path: path.resolve(CURRENT_WORKING_DIR, 'dist'), //  destination
         filename: 'client.bundle.js',
-        publicPath: '/public/'
+        publicPath: '/dist/',
     },
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify(env),
-            'process.env.API_URL': JSON.stringify('https://gppcore.instavc.com')
+            'process.env.NODE_ENV': JSON.stringify(env)
         }),
         new webpack.optimize.UglifyJsPlugin({
             compressor: {
+                pure_getters: true,
                 unsafe: true,
                 unsafe_comps: true,
                 warnings: false
@@ -31,31 +35,12 @@ var config = {
         rules: [
             {
                 test: /\.(js|jsx)$/, //check for all js files
-                loader: 'babel-loader',
-                exclude: /node_modules/
-            },
-            {
-                test: /\.scss$/,
-                use: [
-                    { loader: 'style-loader' }, // creates style nodes from JS strings
-                    { loader: 'css-loader' }, // translates CSS into CommonJS
-                    { loader: 'sass-loader' }, // compiles Sass to CSS
-                ]
-            },
-            {
-                test: /\.css$/,
-                use: [{ loader: 'style-loader' },
-                { loader: 'css-loader' }]
-            },
-            {
-                test: /\.(woff2?|ttf|eot|svg|jpg|png)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader: 'url-loader'
+                exclude: /(node_modules)/,
+                use: [{
+                    loader: 'babel-loader?-babelrc,+cacheDirectory,presets[]=env,presets[]=stage-0,presets[]=react',
+                }]
             }
         ]
-    },
-    resolve: {
-        modules: ['node_modules', 'app'],
-        extensions: ['.js', '.jsx', '.json', '.css']
     },
     devtool: "hidden-source-map"
 };

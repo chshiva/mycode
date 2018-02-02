@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
+import helmet from 'helmet';
 import webpack from 'webpack';
-import helmet from 'react-helmet';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import webpackConfig from './webpack/webpack.config.dev';
@@ -17,19 +17,19 @@ if (process.env.NODE_ENV === 'development') {
 var rootPath = path.normalize(__dirname);
 const directory = {
     root: rootPath,
-    distDir: rootPath + '/public',
+    distDir: rootPath + '/dist',
     assetsDir: rootPath + '/public'
 };
-app.use('/', express.static(directory.root));
-// app.use(helmet());
+app.use('/dist', express.static(directory.distDir));
+app.use(helmet());
 app.use(express.static(directory.assetsDir));
 
 // Landing page
 app.get('*', (req, res, next) => {
-    res.sendFile(path.join(__dirname, '/index.html'));
+    res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
-app.listen(8002, (error) => {
+app.listen(8001, (error) => {
     if (error) {
         console.log(`Error in server startup`, error);
         process.exit(1);
